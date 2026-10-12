@@ -1,6 +1,13 @@
 SHELL := /bin/bash
-.PHONY: doctor up port traffic traffic-ab good fail ab status metrics cleanup slides
-
+.PHONY: help setup tools shell doctor up port traffic traffic-ab good fail ab status metrics cleanup slides
+help:
+	@printf '%s\n' 'setup: ./setup.sh (3 prompts)' 'tools: local pinned toolchain only' 'shell: isolated zsh' 'doctor: diagnostics' 'up: cluster bootstrap' 'port: Envoy port-forward' 'traffic: requests' 'status: Flagger status' 'good/fail/ab: demos' 'cleanup: remove lab cluster'
+setup:
+	bash setup.sh
+tools:
+	bash scripts/install-tools.sh
+shell:
+	bash scripts/shell.sh
 doctor:
 	bash scripts/doctor.sh
 up:

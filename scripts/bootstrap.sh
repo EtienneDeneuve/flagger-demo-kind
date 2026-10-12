@@ -7,12 +7,20 @@ docker info >/dev/null || { echo "Docker non disponible" >&2; exit 1; }
 
 if ! kind get clusters | grep -Fxq "$CLUSTER_NAME"; then
   echo "[1/8] Kind sans CNI par defaut"
-  kind create cluster --name "$CLUSTER_NAME" --config "$ROOT_DIR/kind/cluster.yaml"
+  kind create cluster --name "$CLUSTER_NAME" --config "$ROOT_DIR/kind/cluster.yaml" \
+    --image "$KIND_NODE_IMAGE" --kubeconfig "$KUBECONFIG"
 else
   echo "[1/8] Kind deja present"
+  kind export kubeconfig --name "$CLUSTER_NAME" --kubeconfig "$KUBECONFIG"
 fi
 kubectl config use-context "$CLUSTER_CONTEXT" >/dev/null
 require_context
+node_version="$(kubectl get nodes -o jsonpath='{.items[0].status.nodeInfo.kubeletVersion}' 2>/dev/null || true)"
+if [[ "$node_version" != "v$KUBERNETES_VERSION" ]]; then
+  echo "Existing Kind cluster uses $node_version, expected v$KUBERNETES_VERSION." >&2
+  echo "No automatic destructive upgrade. Run make cleanup and rerun ./setup.sh." >&2
+  exit 2
+fi
 
 if ! helm -n kube-system status cilium >/dev/null 2>&1; then
   echo "[2/8] Cilium (kube-proxy conserve)"

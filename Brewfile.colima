@@ -1,0 +1,5 @@
+# OPTIONAL alternative to Docker Desktop.
+# brew bundle --file=Brewfile.colima installs host-level Docker + Colima,
+# ONLY if the participant explicitly chooses to run this command.
+brew "docker"
+brew "colima"
