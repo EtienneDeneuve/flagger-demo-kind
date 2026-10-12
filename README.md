@@ -1,175 +1,154 @@
-# Progressive Delivery Lab — Kind, Cilium, Envoy Gateway, Flagger
+# Flagger Demo Kind — progressive delivery avec Cilium et Envoy Gateway
 
-**Un TP de 60 minutes sur Mac, trois démonstrations, quatre slides Marp.**
+**TP macOS de 60 minutes · 4 slides Marp · 3 démonstrations.**
 
-Faire passer une nouvelle version de **0 à 50 % de trafic**, décider sur des métriques Prometheus, promouvoir si tout va bien, revenir à la version stable si une dégradation apparaît, puis cibler une beta avec un header HTTP.
+Kubernetes sait effectuer un rolling update. Flagger décide si une nouvelle version **mérite de recevoir davantage de trafic**, en analysant des métriques Prometheus et en modifiant les poids d'un HTTPRoute Gateway API. Le trafic est servi par Envoy Gateway ; Cilium est l'unique CNI. **Aucun Istio, aucun service mesh supplémentaire.**
 
-La stack est volontairement réduite à **Kind + Cilium CNI + Envoy Gateway + Gateway API + Flagger + Prometheus + Podinfo**. Pas de service mesh supplémentaire. Les décisions de Flagger modifient un `HTTPRoute` Gateway API; les requêtes passent par Envoy Gateway.
+## Démarrage : cloner, un script, terminé
 
-> **Etat de validation :** scripts vérifiés syntaxiquement et manifests vérifiés comme YAML, mais **pas d'exécution Kubernetes de bout en bout dans l'environnement de préparation** (pas de Docker/Kind disponible). Faire un `make up` et un essai de chaque scénario sur un Mac avant d'animer le TP. Ne pas présenter cette archive comme déjà testée en production.
-
-## Prérequis macOS
-
-- Mac Apple Silicon ou Intel, Docker Desktop démarré ; recommander **8 Go de RAM alloués à Docker** et une connexion Internet pour le premier pull.
-- Homebrew ; `kubectl`, `kind`, `helm`, `cilium` CLI et `curl`.
-- `marp` uniquement pour générer les slides.
+Prérequis externes : **macOS Apple Silicon ou Intel**, `git`, `curl`, un moteur de conteneurs compatible Docker (Docker Desktop, OrbStack ou Colima) **déjà installé et démarré**, environ **8 Go de RAM alloués** (12 Go recommandés) et un accès Internet pour les images.
 
 ```bash
-brew install kind kubectl helm cilium-cli marp-cli
-make doctor
+git clone https://github.com/EtienneDeneuve/flagger-demo-kind.git
+cd flagger-demo-kind
+./setup.sh
 ```
 
-La configuration crée un cluster Kind distinct, nommé `flagger-platform-lab`, avec deux nœuds et **sans CNI Kind par défaut**. Cilium assure le réseau des pods ; kube-proxy est conservé pour simplifier le TP. Envoy Gateway déploie son proxy de données. Sur macOS, les IP `LoadBalancer` internes à Docker ne sont pas accessibles directement : un `port-forward` est utilisé.
+Le script pose **3 questions**, avec des valeurs par défaut pertinentes :
 
-## Installation
+1. **Shell** : `auto` (utilise ton `devenv` existant, sinon un zsh isolé).
+2. **Créer le cluster Kind ?** Oui.
+3. **Ouvrir le shell du lab ?** Oui.
 
-Depuis la racine de ce projet :
+Un moteur Docker arrêté ou absent est détecté. Le script ne l'installe **pas** silencieusement.
+
+### Zéro mise à jour globale
+
+Le setup installe **systématiquement les versions épinglées** de `kind`, `kubectl`, `helm` et `cilium` dans `.tools/bin/`, même si des versions sont déjà installées globalement. Téléchargements officiels, empreintes **SHA-256 vérifiées**, cache local. Aucun `brew upgrade`, aucun `sudo`, aucune écriture dans `~/.zshrc` ou `~/.kube/config`.
+
+```text
+flagger-demo-kind/
+├── setup.sh             # 3 prompts ; installation outils et cluster
+├── .tools/bin/           # versions CLI locales (ignoré par Git)
+├── .tools/kubeconfig     # accès au seul cluster Kind du TP
+├── .tools/helm/          # données Helm isolées
+├── devenv.nix / .yaml   # option Nix personnelle
+├── Brewfile              # option Docker Desktop, explicite
+├── Brewfile.colima       # alternative Colima, explicite
+├── kind/                 # Kind sans CNI d'origine
+├── manifests/            # Gateway API, Flagger, Podinfo, métriques
+├── scripts/              # commandes de manipulation du TP
+├── docs/                 # guide formateur, diagnostic, publication
+└── slides/               # quatre slides Marp
+```
+
+### Sans Nix
+
+`./setup.sh` sélectionne automatiquement `zsh -f` s'il n'y a pas de `devenv`. Le shell n'édite aucun profil utilisateur. Pour l'ouvrir plus tard :
 
 ```bash
-make up
+./scripts/shell.sh
 ```
 
-Le script installe et attend successivement Cilium, Envoy Gateway, Prometheus, Flagger, Podinfo et la ressource Canary. Il utilise le chart OCI de Flagger avec `meshProvider=gatewayapi:v1`. Le `Gateway` écoute `Host: podinfo.local` en HTTP sur son port 80.
+Les commandes `make ...` fonctionnent **aussi depuis un terminal normal** : chacune charge les chemins et la configuration privés du dépôt.
 
-Ouvrir **trois terminaux** et laisser chacun tourner :
+### Avec devenv (facultatif)
+
+Si `devenv` est déjà présent, `./setup.sh` entre dans `devenv shell` après installation. `devenv.yaml` épingle un commit nixpkgs ; `devenv.nix` ajoute `zsh`, `jq`, `curl`, `git`. **Les CLI Kubernetes proviennent toujours de `.tools/bin`** pour garantir la même expérience dans les deux modes. Nix n'est ni installé ni mis à jour pour les participants.
+
+```bash
+./setup.sh --mode=devenv      # utilise devenv s'il existe
+./setup.sh --mode=local       # force le zsh isolé, même avec Nix
+./setup.sh --tools-only      # prépare les CLI sans créer le cluster
+./setup.sh --yes             # mode automatisé, sans shell interactif
+./setup.sh --help
+```
+
+### Option Brew (sur demande seulement)
+
+`Brewfile` n'installe que le moteur Docker Desktop ; `Brewfile.colima` installe Docker CLI + Colima. Aucun n'est exécuté par `setup.sh`. Le choix est volontaire, afin de ne pas toucher aux versions Homebrew des participants.
+
+```bash
+brew bundle --file=Brewfile          # option Docker Desktop
+brew bundle --file=Brewfile.colima   # option Docker + Colima
+colima start                          # uniquement si Colima a été choisi
+```
+
+## Versions récentes épinglées
+
+| Composant | Version |
+|---|---|
+| Kubernetes dans Kind | **1.36.4** (image officielle multiarch épinglée par digest) |
+| Kind CLI | **0.33.0** |
+| kubectl local | **1.36.4** |
+| Helm CLI | **3.22.0** |
+| Cilium CLI | **0.20.1** |
+| Cilium CNI | **1.20.2** |
+| Envoy Gateway | **1.9.2** |
+| Flagger | **1.45.0** |
+| Podinfo | **6.15.0** |
+| Prometheus | **3.15.0** |
+
+Kubernetes **1.36.4** remplace 1.36.3 car l'image Kind officielle, reproductible et précompilée du cycle 0.33.0 est publiée pour **1.36.4**, pas pour 1.36.3. Voir [les releases Kind](https://github.com/kubernetes-sigs/kind/releases/tag/v0.33.0). Pas de version `latest` flottante.
+
+## Démarrer les démonstrations
+
+Sur le cluster installé, dans **trois terminaux distincts** :
 
 ```bash
 make port      # terminal 1 : Envoy Gateway sur localhost:8080
-make traffic   # terminal 2 : requetes HTTP continues via Envoy
-make status    # terminal 3 : phase, poids, routes et evenements
+make traffic   # terminal 2 : appels HTTP continus vers Envoy
+make status    # terminal 3 : phase Flagger, poids Gateway API, événements
 ```
 
-Vérification initiale :
+Ouvrir d'autres terminaux pour les scénarios :
 
 ```bash
-curl -i -H 'Host: podinfo.local' http://127.0.0.1:8080/
-kubectl -n flagger-demo get gateway,canary,httproute
-kubectl -n flagger-demo get deploy,pods,svc
+make good       # 1. Promotion progressive : 10 → 20 → 30 → 40 → 50 %, puis 100 %
+make fail       # 2. Version dégradée : erreurs HTTP 5xx, rollback automatique
+make traffic-ab # Trafic header x-canary: always (pendant le scénario A/B)
+make ab         # 3. Routage de la cohorte pilote uniquement
 ```
 
-**Important :** il n'y a pas de `HTTPRoute` manuel. Flagger crée puis modifie `httproute/podinfo` et les services `podinfo-primary` / `podinfo-canary`.
-
-## Exercices — 60 minutes
-
-| Temps | Action | Résultat observable |
-|---|---|---|
-| 00–10 min | Architecture et `make doctor` / bootstrap préalable | Kind, Cilium, Gateway et contrôleurs prêts |
-| 10–25 min | Démo 1 : promotion automatisée | `HTTPRoute` : poids canary 10 → 20 → 30 → 40 → 50 %, puis promotion |
-| 25–40 min | Démo 2 : nouvelle version avec erreurs aléatoires HTTP | Flagger bloque, évalue puis revient à la version stable |
-| 40–55 min | Démo 3 : A/B sur `x-canary: always` | Les requêtes du groupe beta ciblent la canary pendant l'analyse |
-| 55–60 min | Débrief / nettoyage | Différence « Deployment mis à jour » vs « promotion autorisée » |
-
-### Démo 1 — Promotion progressive
-
-Dans un **quatrième terminal** :
-
-```bash
-make good
-```
-
-Le Deployment cible reçoit une nouvelle version de configuration visuelle. Flagger met en place une révision canary, augmente les poids du `HTTPRoute`, analyse le taux d'erreur 5xx issu de Prometheus, puis copie la version validée vers `podinfo-primary`.
-
-Suivre :
-
-```bash
-kubectl -n flagger-demo describe canary/podinfo
-kubectl -n flagger-demo get httproute/podinfo -o yaml
-```
-
-Attendre la phase `Succeeded` avant de commencer la démo suivante. Un passage successif par 10/20/30/40/50 % peut être trop rapide pour l'oeil ; `make status` tourne toutes les 3 secondes. À la fin, le trafic retourne à 100 % sur `podinfo-primary` qui exécute désormais la nouvelle version.
-
-### Démo 2 — Rollback sur erreur HTTP
-
-Garder `make traffic` actif, puis :
-
-```bash
-make fail
-```
-
-La modification active `--random-error=true` **uniquement sur la nouvelle version canary** (environ un tiers de réponses dégradées). Les probes Kubernetes sont volontairement tolérantes pour illustrer un rollback fondé sur la qualité du trafic, et non un crash immédiat. Le `MetricTemplate` `podinfo-canary-error-rate` calcule le taux de 5xx sur le **pod canary uniquement**, avec un seuil de 5 %. Après trois contrôles non conformes, la phase passe à `Failed` et Flagger retire le trafic canary.
-
-```bash
-kubectl -n flagger-demo describe canary/podinfo
-kubectl -n flagger-demo get httproute/podinfo -o yaml
-```
-
-**À retenir :** le rollback est opérationnel ; il ne crée pas automatiquement un revert Git. En environnement GitOps, il faut réaligner la source déclarative pour éviter que la mauvaise révision revienne lors d'un futur reconcile.
-
-### Démo 3 — A/B testing par header
-
-Une fois le rollback terminé, démarrer **un second générateur** avec un header dédié :
-
-```bash
-make traffic-ab  # autre terminal : X-Canary: always
-make ab          # modifie la strategie Canary puis lance V4 sans defaut
-```
-
-Pendant la phase `Progressing`, comparer les deux requêtes :
-
-```bash
-curl -s -H 'Host: podinfo.local' http://127.0.0.1:8080/
-curl -s -H 'Host: podinfo.local' -H 'x-canary: always' http://127.0.0.1:8080/
-```
-
-Avec A/B, il ne faut **pas** attendre des poids progressifs 10→50 : Flagger crée une règle ciblée pour le header, et la promotion intervient après le nombre d'itérations configuré. Le routage sélectif vaut **pendant l'analyse**, pas après promotion (la nouvelle version devient la primary pour tous).
-
-## Prometheus et métrique de décision
-
-Dans un autre terminal :
+Visualisation technique :
 
 ```bash
 make metrics
+kubectl -n flagger-demo describe canary/podinfo
+kubectl -n flagger-demo get httproute/podinfo -o yaml
+curl -H 'Host: podinfo.local' http://127.0.0.1:8080/
 ```
 
-Interface : http://localhost:9090/graph ; requêtes PromQL utiles :
+Le namespace est `flagger-demo`. Le cluster s'appelle `flagger-platform-lab`. Flagger crée et possède la `HTTPRoute` : **ne pas déployer une HTTPRoute manuelle concurrente**.
 
-```promql
-sum(rate(http_requests_total{job="podinfo-canary"}[1m]))
-```
+### Déroulé de l'heure
 
-```promql
-100 * (sum(rate(http_requests_total{job="podinfo-canary",status=~"5.."}[1m])) or vector(0)) / clamp_min(sum(rate(http_requests_total{job="podinfo-canary"}[1m])), 0.001)
-```
+| Minute | Démonstration |
+|---|---|
+| 00–10 | Architecture, rôles de Cilium / Envoy / Flagger |
+| 10–25 | Promotion par poids HTTPRoute |
+| 25–40 | Rollback sur signal applicatif, pas sur readiness |
+| 40–55 | A/B ciblé sur un header |
+| 55–60 | Discussion métriques / GitOps / production |
 
-Le Prometheus minimal ne scrappe **que les pods cibles de la version canary** (étiquette `app=podinfo`, port nommé `http-metrics`). Cela permet d'illustrer un signal applicatif. Pour un environnement réel, prévoir des SLIs **vus depuis Envoy**, de la disponibilité de bout en bout, une période de mesure plus longue et la qualité du trafic avant d'automatiser des rollbacks.
+Prévoir **l'installation initiale en amont** : téléchargement des images Kind, Cilium et Envoy Gateway peut dépasser le temps disponible en séance. Les scénarios eux-mêmes sont les 60 minutes de TP.
 
-## Présentation Marp
-
-Fichier source : [`slides/flagger-tp.marp.md`](slides/flagger-tp.marp.md). Quatre slides éditables en Markdown.
+Pour revenir à zéro :
 
 ```bash
-make slides
-marp slides/flagger-tp.marp.md --pdf --output slides/flagger-tp.pdf
+make cleanup  # supprime uniquement le cluster Kind flagger-platform-lab
 ```
 
-## Structure
+## Slides, documentation et limites
 
-```text
-.
-├── kind/cluster.yaml            # 2 noeuds; pas de CNI Kind
-├── manifests/                  # Gateway, Podinfo, Prometheus, MetricTemplate, Canary, A/B
-├── scripts/                    # Bootstrap, trafic, scenarios, monitoring, cleanup
-├── slides/flagger-tp.marp.md    # 4 slides
-├── docs/                       # Guide formateur, architecture, diagnostic, public checklist
-├── versions.env                # Composants epingles
-├── Makefile
-└── README.md
-```
+- [4 slides Marp](slides/flagger-tp.marp.md) — source éditable Markdown.
+- [Déroulé animateur](docs/00-formateur.md).
+- [Architecture](docs/01-architecture.md).
+- [Diagnostic](docs/02-diagnostic.md).
+- [Checklist avant publication publique](docs/03-publication.md).
 
-## Nettoyage
+Marp n'est pas nécessaire pour **exécuter** le lab. Pour exporter les slides, installer Marp CLI séparément ou utiliser l'extension Marp de VS Code.
 
-```bash
-make cleanup   # supprime uniquement le cluster kind "flagger-platform-lab"
-```
+**Niveau de vérification :** la CI vérifie Bash et YAML. Le cluster complet n'a **pas encore été exécuté de bout en bout sur un Mac de participant** ; un essai à blanc est obligatoire avant la séance. Le repo est un support pédagogique, pas un template production. Les outils locaux sont limités au dossier du dépôt ; l'exécution de Kind créera en revanche les conteneurs Docker nommés du lab.
 
-## Références / crédits
-
-- [Flagger — progressive delivery via Gateway API](https://docs.flagger.app/tutorials/gatewayapi-progressive-delivery)
-- [Flagger — MetricTemplate](https://docs.flagger.app/usage/metrics)
-- [Gateway API HTTPRoute](https://gateway-api.sigs.k8s.io/guides/user-guides/http-routing/)
-- [Envoy Gateway, installation Helm](https://gateway.envoyproxy.io/v1.7/install/install-helm/)
-- [Cilium, installation sur Kind](https://docs.cilium.io/en/stable/installation/kind/)
-- [Podinfo](https://github.com/stefanprodan/podinfo)
-- [k8ssecurity/k8s_gateway_api_tutorial](https://github.com/k8ssecurity/k8s_gateway_api_tutorial) (projet existant étudié comme référence, **non inclus** ni forké)
-
-Ce lab est un environnement d'enseignement, pas un template pour un cluster exposé en production.
+Sources : [Kind](https://kind.sigs.k8s.io/), [Cilium](https://docs.cilium.io/en/stable/), [Envoy Gateway](https://gateway.envoyproxy.io/), [Flagger Gateway API](https://docs.flagger.app/tutorials/gatewayapi-progressive-delivery), [Podinfo](https://github.com/stefanprodan/podinfo), [devenv](https://devenv.sh/).
