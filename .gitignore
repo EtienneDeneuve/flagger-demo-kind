@@ -2,6 +2,9 @@
 .env
 *.log
 *.pid
+.tools/
+.devenv/
+.direnv/
 node_modules/
 slides/*.pdf
 slides/*.html
