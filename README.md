@@ -29,6 +29,7 @@ Le setup installe **systématiquement les versions épinglées** de `kind`, `kub
 ```text
 flagger-demo-kind/
 ├── setup.sh             # 3 prompts ; installation outils et cluster
+├── lab                  # kubectl/helm protégés par kubeconfig privé
 ├── .tools/bin/           # versions CLI locales (ignoré par Git)
 ├── .tools/kubeconfig     # accès au seul cluster Kind du TP
 ├── .tools/helm/          # données Helm isolées
@@ -50,7 +51,7 @@ flagger-demo-kind/
 ./scripts/shell.sh
 ```
 
-Les commandes `make ...` fonctionnent **aussi depuis un terminal normal** : chacune charge les chemins et la configuration privés du dépôt.
+Les commandes `make ...` fonctionnent **aussi depuis un terminal normal** : chacune charge les chemins et la configuration privés du dépôt. Pour une commande `kubectl` isolée depuis n'importe quel terminal, utiliser **`./lab kubectl ...`**. Le wrapper refuse d'agir si le contexte attendu n'est pas celui du TP.
 
 ### Avec devenv (facultatif)
 
@@ -114,8 +115,8 @@ Visualisation technique :
 
 ```bash
 make metrics
-kubectl -n flagger-demo describe canary/podinfo
-kubectl -n flagger-demo get httproute/podinfo -o yaml
+./lab kubectl -n flagger-demo describe canary/podinfo
+./lab kubectl -n flagger-demo get httproute/podinfo -o yaml
 curl -H 'Host: podinfo.local' http://127.0.0.1:8080/
 ```
 

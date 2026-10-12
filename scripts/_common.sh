@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "$BASH_SOURCE")/.." && pwd)"
 TOOLS_DIR="$ROOT_DIR/.tools"
 TOOLS_BIN="$TOOLS_DIR/bin"
 CLUSTER_NAME="flagger-platform-lab"

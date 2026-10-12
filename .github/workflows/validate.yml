@@ -15,7 +15,7 @@ jobs:
 
       - name: Check Bash syntax (including setup)
         run: |
-          bash -n setup.sh scripts/*.sh
+          bash -n lab setup.sh scripts/*.sh
           bash setup.sh --help
 
       - name: Parse Kubernetes, Gateway and devenv YAML
@@ -42,6 +42,9 @@ jobs:
           grep -q 'KUBECONFIG=' scripts/_common.sh
           grep -q 'TOOLS_BIN=' scripts/_common.sh
           ! grep -ER 'brew upgrade|sudo +brew' setup.sh scripts/install-tools.sh
+          test -x setup.sh
+          test -x lab
+          test -x scripts/install-tools.sh
           test -f Brewfile
           test -f devenv.nix
           test -f devenv.yaml
