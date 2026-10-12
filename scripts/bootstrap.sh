@@ -29,7 +29,9 @@ kubectl -n envoy-gateway-system wait --for=condition=available deployment/envoy-
 
 echo "[4/8] GatewayClass + Gateway"
 kubectl apply -f "$ROOT_DIR/manifests/01-gateway.yaml"
-kubectl -n "$LAB_NS" wait gateway/lab-gateway --for=condition=Programmed --timeout=300s
+# Un Service de type LoadBalancer peut rester Pending sur Kind sans LB controller.
+# Le port-forward vers le proxy Envoy fonctionne sans IP LoadBalancer.
+kubectl -n "$LAB_NS" get gateway lab-gateway
 
 echo "[5/8] Prometheus minimal"
 kubectl create ns flagger-system --dry-run=client -o yaml | kubectl apply -f -
