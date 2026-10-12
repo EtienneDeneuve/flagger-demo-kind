@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# A safe, project-scoped entry point for ad hoc kubectl/helm/cilium/kind commands.
+set -euo pipefail
+source "$(dirname "$0")/scripts/_common.sh"
+if (( $# == 0 )); then
+  echo "Usage: ./lab kubectl -n flagger-demo get canary"
+  echo "       ./lab helm list -A"
+  exit 2
+fi
+require_context
+exec "$@"

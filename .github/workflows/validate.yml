@@ -12,9 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Check Bash syntax
-        run: bash -n scripts/*.sh
-      - name: Parse Kubernetes YAML
+
+      - name: Check Bash syntax (including setup)
+        run: |
+          bash -n lab setup.sh scripts/*.sh
+          bash setup.sh --help
+
+      - name: Parse Kubernetes, Gateway and devenv YAML
         run: |
           python3 -m pip install --user PyYAML
           python3 - <<'PY'
@@ -23,8 +27,24 @@ jobs:
           paths = list(Path('kind').glob('*.yaml'))
           paths += list(Path('manifests').glob('*.yaml'))
           paths += list(Path('.github').rglob('*.yml'))
+          paths += list(Path('.').glob('devenv.yaml'))
           for path in paths:
-              docs = list(yaml.safe_load_all(path.read_text()))
-              assert docs, f'Empty manifest: {path}'
-              print(path, len(docs))
+              documents = list(yaml.safe_load_all(path.read_text()))
+              assert documents, f'Empty YAML: {path}'
+              print(path, len(documents))
           PY
+
+      - name: Check pinned toolchain and isolation
+        run: |
+          set -e
+          grep -Fxq 'KUBERNETES_VERSION=1.36.4' versions.env
+          grep -q '^KIND_NODE_IMAGE=kindest/node:v1.36.4@sha256:' versions.env
+          grep -q 'KUBECONFIG=' scripts/_common.sh
+          grep -q 'TOOLS_BIN=' scripts/_common.sh
+          ! grep -ER 'brew upgrade|sudo +brew' setup.sh scripts/install-tools.sh
+          test -x setup.sh
+          test -x lab
+          test -x scripts/install-tools.sh
+          test -f Brewfile
+          test -f devenv.nix
+          test -f devenv.yaml

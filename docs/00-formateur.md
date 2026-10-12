@@ -6,12 +6,12 @@
 
 ## Préparation impérative avant l'atelier
 
-**Ne pas compter sur l'installation à froid en séance.** Cilium, Envoy Gateway et les images de Kind prennent un temps dépendant du Mac et du réseau. Le formateur doit avoir exécuté `make up`, `make port`, `make traffic`, puis les trois expériences sur sa machine. Les participants peuvent lancer `make up` en amont ou travailler par binôme sur un cluster précréé. Le planning ci-dessous suppose cette préinstallation ; autrement le TP risque de dépasser 60 minutes.
+**Ne pas compter sur l'installation à froid en séance.** Cilium, Envoy Gateway et les images de Kind prennent un temps dépendant du Mac et du réseau. Le formateur doit avoir exécuté `./setup.sh --yes`, `make port`, `make traffic`, puis les trois expériences sur sa machine. Les participants peuvent lancer `./setup.sh --yes` en amont ou travailler par binôme sur un cluster précréé. Le planning ci-dessous suppose cette préinstallation ; autrement le TP risque de dépasser 60 minutes.
 
 Faire un essai à blanc et relever :
 
-- `kubectl -n flagger-demo get canary/podinfo` = `Succeeded` initialement
-- `kubectl -n flagger-demo get httproute/podinfo` retourne une route acceptée
+- `./lab kubectl -n flagger-demo get canary/podinfo` = `Succeeded` initialement
+- `./lab kubectl -n flagger-demo get httproute/podinfo` retourne une route acceptée
 - `curl -H 'Host: podinfo.local' http://127.0.0.1:8080/` fonctionne via Envoy
 - `make metrics` : après démarrage de la canary et d'un flux HTTP, le compteur 5xx est disponible
 - Promotion complète en moins de ~6 minutes, rollback en quelques cycles, A/B par header

@@ -7,10 +7,10 @@ Comportement attendu avec Docker Desktop : le reseau Kind vit dans une VM Linux.
 ## Pas de HTTPRoute/podinfo
 
 ```bash
-kubectl config current-context
-kubectl -n flagger-system logs deployment/flagger --tail=150
-kubectl -n flagger-demo describe canary/podinfo
-kubectl -n flagger-demo get gateway/lab-gateway -o yaml
+./lab kubectl config current-context
+./lab kubectl -n flagger-system logs deployment/flagger --tail=150
+./lab kubectl -n flagger-demo describe canary/podinfo
+./lab kubectl -n flagger-demo get gateway/lab-gateway -o yaml
 ```
 
 Vérifier que Flagger a `meshProvider=gatewayapi:v1`, que le Gateway `lab-gateway` est Accepted et que les CRDs Gateway API v1 sont presentes. Il ne faut pas appliquer soi-meme de HTTPRoute `podinfo`.
@@ -18,9 +18,9 @@ Vérifier que Flagger a `meshProvider=gatewayapi:v1`, que le Gateway `lab-gatewa
 ## Métriques absentes / "no values found"
 
 ```bash
-kubectl -n flagger-demo get pods -l app=podinfo -o wide
-kubectl -n flagger-system logs deploy/prometheus-lab --tail=80
-kubectl -n flagger-system get cm prometheus-lab-config -o yaml
+./lab kubectl -n flagger-demo get pods -l app=podinfo -o wide
+./lab kubectl -n flagger-system logs deploy/prometheus-lab --tail=80
+./lab kubectl -n flagger-system get cm prometheus-lab-config -o yaml
 make metrics
 ```
 
