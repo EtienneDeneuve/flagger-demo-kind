@@ -1,25 +1,27 @@
+SHELL := /bin/bash
 .PHONY: doctor up port traffic traffic-ab good fail ab status metrics cleanup slides
+
 doctor:
-	./scripts/doctor.sh
+	bash scripts/doctor.sh
 up:
-	./scripts/bootstrap.sh
+	bash scripts/bootstrap.sh
 port:
-	./scripts/port-forward.sh
+	bash scripts/port-forward.sh
 traffic:
-	./scripts/traffic.sh
+	bash scripts/traffic.sh
 traffic-ab:
-	./scripts/traffic.sh ab
+	bash scripts/traffic.sh ab
 good:
-	./scripts/promotion.sh
+	bash scripts/promotion.sh
 fail:
-	./scripts/rollback.sh
+	bash scripts/rollback.sh
 ab:
-	./scripts/ab.sh
+	bash scripts/ab.sh
 status:
-	./scripts/status.sh
+	bash scripts/status.sh
 metrics:
-	./scripts/prometheus.sh
+	bash scripts/prometheus.sh
 cleanup:
-	./scripts/cleanup.sh
+	bash scripts/cleanup.sh
 slides:
 	marp slides/flagger-tp.marp.md --html --output slides/flagger-tp.html

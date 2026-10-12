@@ -1,0 +1,123 @@
+# Prometheus de demonstration : cible UNIQUEMENT les pods du Deployment canary.
+# Le nom des pods podinfo-<replicaset>-<suffix> exclut podinfo-primary-...
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus-lab
+  namespace: flagger-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: prometheus-flagger-lab
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus-flagger-lab
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus-flagger-lab
+subjects:
+  - kind: ServiceAccount
+    name: prometheus-lab
+    namespace: flagger-system
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-lab-config
+  namespace: flagger-system
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 5s
+      evaluation_interval: 5s
+    scrape_configs:
+      - job_name: podinfo-canary
+        metrics_path: /metrics
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names:
+                - flagger-demo
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: keep
+            regex: 'podinfo-[a-z0-9]+-[a-z0-9]+'
+          - source_labels: [__meta_kubernetes_pod_container_port_name]
+            action: keep
+            regex: http-metrics
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-lab
+  namespace: flagger-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus-lab
+  template:
+    metadata:
+      labels:
+        app: prometheus-lab
+    spec:
+      serviceAccountName: prometheus-lab
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v3.5.0
+          args:
+            - --config.file=/etc/prometheus/prometheus.yml
+            - --storage.tsdb.path=/prometheus
+            - --storage.tsdb.retention.time=3h
+          ports:
+            - name: http
+              containerPort: 9090
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          volumeMounts:
+            - name: config
+              mountPath: /etc/prometheus
+            - name: data
+              mountPath: /prometheus
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+      volumes:
+        - name: config
+          configMap:
+            name: prometheus-lab-config
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-lab
+  namespace: flagger-system
+spec:
+  selector:
+    app: prometheus-lab
+  ports:
+    - name: http
+      port: 9090
+      targetPort: http

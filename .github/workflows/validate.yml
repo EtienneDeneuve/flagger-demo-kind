@@ -1,0 +1,30 @@
+name: Validate lab sources
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Bash syntax
+        run: bash -n scripts/*.sh
+      - name: Parse Kubernetes YAML
+        run: |
+          python3 -m pip install --user PyYAML
+          python3 - <<'PY'
+          from pathlib import Path
+          import yaml
+          paths = list(Path('kind').glob('*.yaml'))
+          paths += list(Path('manifests').glob('*.yaml'))
+          paths += list(Path('.github').rglob('*.yml'))
+          for path in paths:
+              docs = list(yaml.safe_load_all(path.read_text()))
+              assert docs, f'Empty manifest: {path}'
+              print(path, len(docs))
+          PY

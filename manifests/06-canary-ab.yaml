@@ -1,0 +1,38 @@
+# Routage selective de la cohorte x-canary=always pendant la phase Progressing.
+apiVersion: flagger.app/v1beta1
+kind: Canary
+metadata:
+  name: podinfo
+  namespace: flagger-demo
+spec:
+  provider: gatewayapi:v1
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: podinfo
+  progressDeadlineSeconds: 180
+  service:
+    port: 9898
+    targetPort: 9898
+    portName: http
+    hosts:
+      - podinfo.local
+    gatewayRefs:
+      - name: lab-gateway
+        namespace: flagger-demo
+  analysis:
+    interval: 30s
+    threshold: 3
+    iterations: 6
+    match:
+      - headers:
+          x-canary:
+            exact: always
+    metrics:
+      - name: podinfo-canary-error-rate
+        templateRef:
+          name: podinfo-canary-error-rate
+          namespace: flagger-system
+        thresholdRange:
+          max: 5
+        interval: 30s
