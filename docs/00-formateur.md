@@ -29,15 +29,17 @@ Les `make *` restent un filet (même YAML) si un binôme est perdu ou pour ta d�
 
 ## Fil narratif
 
-**0–10 — Piège rolling update + TP 0.** Ready ≠ digne du trafic. Slide 2. Ils ouvrent `05-canary.yaml` **et** `tp/01-promote-v2.patch.yaml` (qu’est-ce qui change dans le hash ?).
+Slides : `slides/flagger-tp.marp.md` (ouverture → Ready ≠ confiance → archi → boucle → parcours → terminaux → TP0–3 → limites → takeaway).
 
-**10–25 — TP 1.** Ils patchent `01-promote-v2.patch.yaml` eux-mêmes. Status + `backendRefs`. Question : qui a écrit la HTTPRoute ?
+**0–10 — Piège rolling update + TP 0.** Slides 01–06. Ils ouvrent `05-canary.yaml` **et** `tp/01-promote-v2.patch.yaml` (qu’est-ce qui change dans le hash ?).
 
-**25–40 — TP 2.** Deux gestes visibles : patch `02-degraded-v3` puis `curl …/fault_injection/enable` sur le Service canary. Halt / Failed. Rollback ≠ git revert. **Pause ~15 s** avant TP 3.
+**10–25 — TP 1.** Slide 07. Ils patchent `01-promote-v2.patch.yaml` eux-mêmes. Status + `backendRefs`. Question : qui a écrit la HTTPRoute ?
 
-**40–55 — TP 3.** `apply 03-ab-canary.yaml` puis patch `03-revision-v4`. Split header/public. Insister : un fichier = stratégie Canary, l’autre = révision app.
+**25–40 — TP 2.** Slide 08. Deux gestes visibles : patch `02-degraded-v3` puis `curl …/fault_injection/enable` sur le Service canary. Halt / Failed. Rollback ≠ git revert. **Pause ~15 s** avant TP 3.
 
-**55–60 — Limites + cleanup.** Flagger = boucle de contrôle. Pas d’alerting / GitOps / Envoy E2E / policies sécu.
+**40–55 — TP 3.** Slide 09. `apply 03-ab-canary.yaml` puis patch `03-revision-v4`. Split header/public. Insister : un fichier = stratégie Canary, l’autre = révision app.
+
+**55–60 — Limites + cleanup.** Slides 10–11. Flagger = boucle de contrôle. Pas d’alerting / GitOps / Envoy E2E / policies sécu.
 
 ## Gestion du temps / secours
 
