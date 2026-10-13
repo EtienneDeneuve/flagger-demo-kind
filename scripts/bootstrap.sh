@@ -24,7 +24,7 @@ fi
 
 if ! helm -n kube-system status cilium >/dev/null 2>&1; then
   echo "[2/8] Cilium (kube-proxy conserve)"
-  cilium install --version "$CILIUM_VERSION" --set operator.replicas=1
+  cilium install --version "$CILIUM_VERSION" --set operator.replicas=1 --set ipam.mode=kubernetes --set kubeProxyReplacement=false
 fi
 cilium status --wait
 kubectl wait nodes --all --for=condition=Ready --timeout=300s
@@ -40,6 +40,7 @@ kubectl apply -f "$ROOT_DIR/manifests/01-gateway.yaml"
 # Un Service de type LoadBalancer peut rester Pending sur Kind sans LB controller.
 # Le port-forward vers le proxy Envoy fonctionne sans IP LoadBalancer.
 kubectl -n "$LAB_NS" get gateway lab-gateway
+kubectl -n "$LAB_NS" wait --for=condition=Accepted gateway/lab-gateway --timeout=180s
 
 echo "[5/8] Prometheus minimal"
 kubectl create ns flagger-system --dry-run=client -o yaml | kubectl apply -f -
@@ -67,5 +68,6 @@ for i in $(seq 1 60); do
   sleep 3
 done
 kubectl -n "$LAB_NS" rollout status deploy/podinfo-primary --timeout=300s
+kubectl -n "$LAB_NS" wait --for=condition=Accepted httproute/podinfo --timeout=180s
 kubectl -n "$LAB_NS" get canary,httproute,deploy,svc
 echo "Pret. Lancer make port, make traffic, make status dans 3 terminaux."

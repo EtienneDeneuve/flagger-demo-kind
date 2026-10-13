@@ -36,3 +36,10 @@ spec:
         thresholdRange:
           max: 5
         interval: 30s
+      - name: podinfo-canary-scrape-up
+        templateRef:
+          name: podinfo-canary-scrape-up
+          namespace: flagger-system
+        thresholdRange:
+          min: 1
+        interval: 30s
