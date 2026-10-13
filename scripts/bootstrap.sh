@@ -68,6 +68,6 @@ for i in $(seq 1 60); do
   sleep 3
 done
 kubectl -n "$LAB_NS" rollout status deploy/podinfo-primary --timeout=300s
-kubectl -n "$LAB_NS" wait --for=condition=Accepted httproute/podinfo --timeout=180s
+wait_httproute_accepted "$LAB_NS" podinfo
 kubectl -n "$LAB_NS" get canary,httproute,deploy,svc
 echo "Pret. Lancer make port, make traffic, make status dans 3 terminaux."

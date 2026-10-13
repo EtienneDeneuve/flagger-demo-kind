@@ -67,7 +67,7 @@ wait_phase() {
 }
 
 echo "E2E 1/4: bootstrapped workload and Gateway are available"
-kubectl -n "$LAB_NS" wait --for=condition=Accepted httproute/podinfo --timeout=180s
+wait_httproute_accepted "$LAB_NS" podinfo
 bash "$ROOT_DIR/scripts/port-forward.sh" >"$out/port-forward.log" 2>&1 &
 pf="$!"
 wait_http http://127.0.0.1:8080/ "x-lab: smoke"

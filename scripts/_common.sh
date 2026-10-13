@@ -33,3 +33,20 @@ require_context() {
   fi
 }
 load_versions() { source "$ROOT_DIR/versions.env"; }
+
+# Gateway API HTTPRoute does not have top-level .status.conditions:
+# acceptance is recorded under .status.parents[*].conditions.
+wait_httproute_accepted() {
+  local namespace="$1" route="$2" attempts=0 condition refs
+  for ((attempts=0; attempts<90; attempts++)); do
+    condition="$(kubectl -n "$namespace" get httproute "$route" \
+      -o jsonpath='{.status.parents[*].conditions[?(@.type=="Accepted")].status}' 2>/dev/null || true)"
+    refs="$(kubectl -n "$namespace" get httproute "$route" \
+      -o jsonpath='{.status.parents[*].conditions[?(@.type=="ResolvedRefs")].status}' 2>/dev/null || true)"
+    if [[ "$condition" == *True* && "$refs" != *False* ]]; then return 0; fi
+    sleep 2
+  done
+  echo "HTTPRoute $namespace/$route not Accepted/ResolvedRefs after 180s" >&2
+  kubectl -n "$namespace" describe httproute "$route" >&2 || true
+  return 1
+}
