@@ -1,5 +1,5 @@
-# Metrique applicative Podinfo ciblee exclusivement sur la nouvelle version.
-# Pas de HTTP 5xx -> numerateur vector(0) ; pas de trafic -> pas de denominator.
+# Missing metrics must not be mistaken for good metrics.
+# Canary pod metrics are scraped by prometheus-lab (never primary pod metrics).
 apiVersion: flagger.app/v1beta1
 kind: MetricTemplate
 metadata:
@@ -10,7 +10,20 @@ spec:
     type: prometheus
     address: http://prometheus-lab.flagger-system.svc.cluster.local:9090
   query: |
-    100 *
-    (sum(rate(http_requests_total{job="podinfo-canary",status=~"5.."}[1m])) or vector(0))
-    /
-    clamp_min(sum(rate(http_requests_total{job="podinfo-canary"}[1m])), 0.001)
+    100 * (
+      (sum(rate(http_requests_total{job="podinfo-canary",status=~"5.."}[1m])) or vector(0))
+      /
+      clamp_min((sum(rate(http_requests_total{job="podinfo-canary"}[1m])) or vector(0)), 0.001)
+    )
+---
+apiVersion: flagger.app/v1beta1
+kind: MetricTemplate
+metadata:
+  name: podinfo-canary-scrape-up
+  namespace: flagger-system
+spec:
+  provider:
+    type: prometheus
+    address: http://prometheus-lab.flagger-system.svc.cluster.local:9090
+  query: |
+    sum(up{job="podinfo-canary"}) or vector(0)

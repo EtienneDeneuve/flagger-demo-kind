@@ -1,0 +1,67 @@
+name: End-to-end lab verification
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/**'
+      - 'setup.sh'
+      - 'versions.env'
+      - 'kind/**'
+      - 'manifests/**'
+      - 'devenv.*'
+      - '.github/workflows/e2e.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  macos-toolchain:
+    name: macOS CLI installer — existing tools untouched
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [macos-15, macos-15-intel]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install tools via the participant's setup entrypoint
+        run: |
+          bash setup.sh --yes --tools-only --mode=local
+          bash setup.sh --yes --tools-only --mode=auto
+      - name: Verify binaries and paths
+        run: |
+          set -euo pipefail
+          uname -sm
+          test -x .tools/bin/kind
+          test -x .tools/bin/kubectl
+          test -x .tools/bin/helm
+          test -x .tools/bin/cilium
+          test -f .tools/state/kind.version
+          test -f .tools/state/kubectl.version
+          bash scripts/install-tools.sh
+
+  linux-kubernetes:
+    name: Linux / real Kind-Cilium-Envoy-Flagger E2E
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Docker and kernel
+        run: |
+          docker info
+          uname -a
+      - name: Install pinned project-local CLI tools
+        run: bash scripts/install-tools.sh
+      - name: Bootstrap the complete lab
+        run: bash scripts/bootstrap.sh
+      - name: Test promotion, rollback and A/B against Envoy
+        run: bash scripts/ci-smoke.sh
+      - name: Upload diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flagger-lab-e2e-diagnostics
+          path: .tools/e2e-logs/
+          if-no-files-found: ignore

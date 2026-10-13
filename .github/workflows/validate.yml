@@ -15,7 +15,9 @@ jobs:
 
       - name: Check Bash syntax (including setup)
         run: |
-          bash -n lab setup.sh scripts/*.sh
+          for f in lab setup.sh scripts/*.sh; do
+            bash -n "$f"
+          done
           bash setup.sh --help
 
       - name: Parse Kubernetes, Gateway and devenv YAML
