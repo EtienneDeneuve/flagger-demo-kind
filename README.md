@@ -4,7 +4,8 @@
 
 **TP macOS de 60 minutes · 4 slides Marp · YAML à appliquer (pas seulement `make`).**
 
-Page projet (site) : [etienne.deneuve.xyz/projects/flagger-demo-kind](https://etienne.deneuve.xyz/projects/flagger-demo-kind/) (après ouverture publique).
+Page projet (site) : [etienne.deneuve.xyz/projects/flagger-demo-kind](https://etienne.deneuve.xyz/projects/flagger-demo-kind/).  
+**Ouverture publique du dépôt :** 13 octobre 2026, **10h30** (Europe/Paris).
 
 Kubernetes sait effectuer un rolling update. Flagger décide si une nouvelle version **mérite de recevoir davantage de trafic**, en analysant des métriques Prometheus et en modifiant les poids d'un HTTPRoute Gateway API. Le trafic est servi par Envoy Gateway ; Cilium est l'unique CNI. **Aucun Istio, aucun service mesh supplémentaire.**
 

@@ -8,6 +8,9 @@ Kubernetes can roll pods. Flagger decides whether a new revision **deserves more
 
 This is a **teaching lab**, not a production template.
 
+Project page: [etienne.deneuve.xyz/projects/flagger-demo-kind](https://etienne.deneuve.xyz/projects/flagger-demo-kind/).  
+**Repository goes public:** 13 October 2026, **10:30** (Europe/Paris).
+
 ## Quick start
 
 **Prerequisites:** macOS (Apple Silicon or Intel), `git`, `curl`, a running Docker-compatible engine (Docker Desktop, OrbStack, **Rancher Desktop in Moby mode**, or Colima), ~8 GB RAM for the engine (12 GB recommended), and network access for images.
