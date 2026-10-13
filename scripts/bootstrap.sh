@@ -2,8 +2,9 @@
 set -euo pipefail
 source "$(dirname "$BASH_SOURCE")/_common.sh"
 load_versions
+ensure_docker_cli || true
 for c in kind docker helm kubectl cilium; do require_command "$c"; done
-docker info >/dev/null || { echo "Docker non disponible" >&2; exit 1; }
+require_docker
 
 if ! kind get clusters | grep -Fxq "$CLUSTER_NAME"; then
   echo "[1/8] Kind sans CNI par defaut"

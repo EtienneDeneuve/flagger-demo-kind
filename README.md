@@ -6,7 +6,7 @@ Kubernetes sait effectuer un rolling update. Flagger décide si une nouvelle ver
 
 ## Démarrage : cloner, un script, terminé
 
-Prérequis externes : **macOS Apple Silicon ou Intel**, `git`, `curl`, un moteur de conteneurs compatible Docker (Docker Desktop, OrbStack ou Colima) **déjà installé et démarré**, environ **8 Go de RAM alloués** (12 Go recommandés) et un accès Internet pour les images.
+Prérequis externes : **macOS Apple Silicon ou Intel**, `git`, `curl`, un moteur de conteneurs compatible Docker (Docker Desktop, OrbStack, **Rancher Desktop en mode Moby**, ou Colima) **déjà installé et démarré**, environ **8 Go de RAM alloués** (12 Go recommandés) et un accès Internet pour les images. Avec Rancher, laisser Kubernetes intégré désactivé (Kind porte le cluster) et s’assurer que `docker` répond (`~/.rd/bin` est ajouté automatiquement si le PATH est en mode manual).
 
 ```bash
 git clone https://github.com/EtienneDeneuve/flagger-demo-kind.git
@@ -37,11 +37,13 @@ flagger-demo-kind/
 ├── Brewfile              # option Docker Desktop, explicite
 ├── Brewfile.colima       # alternative Colima, explicite
 ├── kind/                 # Kind sans CNI d'origine
-├── manifests/            # Gateway API, Flagger, Podinfo, métriques
-├── scripts/              # commandes de manipulation du TP
-├── docs/                 # guide formateur, diagnostic, publication
+├── manifests/            # Gateway, Podinfo, métriques, Canary
+├── manifests/tp/         # YAML TP à patch/apply soi-même (anti-magique)
+├── scripts/              # raccourcis make (= mêmes fichiers tp/)
+├── docs/                 # formateur, participant, diagnostic
 └── slides/               # quatre slides Marp
 ```
+
 
 ### Sans Nix
 
@@ -100,16 +102,27 @@ Sur le cluster installé, dans **trois terminaux distincts** :
 make port      # terminal 1 : Envoy Gateway sur localhost:8080
 make traffic   # terminal 2 : appels HTTP continus vers Envoy
 make status    # terminal 3 : phase Flagger, poids Gateway API, événements
+make browser   # UI podinfo dans le navigateur (proxy Host: podinfo.local → :18080)
 ```
 
-Ouvrir d'autres terminaux pour les scénarios :
+Sans `make browser` : `curl -H 'Host: podinfo.local' http://127.0.0.1:8080/` (un `http://127.0.0.1:8080/` nu renvoie **404** — la HTTPRoute matche le hostname). Alternative : `127.0.0.1 podinfo.local` dans `/etc/hosts`, puis http://podinfo.local:8080/.
+
+Scénarios **recommandés** (fichiers lus + appliqués) — détail : [docs/05-tp-participant.md](docs/05-tp-participant.md) :
 
 ```bash
-make good       # 1. Promotion progressive : 10 → 20 → 30 → 40 → 50 %, puis 100 %
-make fail       # 2. Version dégradée : erreurs HTTP 5xx, rollback automatique
-make traffic-ab # Trafic header x-canary: always (pendant le scénario A/B)
-make ab         # 3. Routage de la cohorte pilote uniquement
+# 1. Promotion : patch Deployment → Flagger avance les poids
+./lab kubectl -n flagger-demo patch deploy/podinfo --type strategic \
+  --patch-file manifests/tp/01-promote-v2.patch.yaml
+
+# 2. Rollback : patch V3 + fault injection sur svc/podinfo-canary (voir le guide)
+
+# 3. A/B : apply Canary (match header) puis patch V4
+./lab kubectl apply -f manifests/tp/03-ab-canary.yaml
+./lab kubectl -n flagger-demo patch deploy/podinfo --type strategic \
+  --patch-file manifests/tp/03-revision-v4.patch.yaml
 ```
+
+Raccourcis équivalents (même YAML) : `make good` · `make fail` · `make traffic-ab` + `make ab`.
 
 Visualisation technique :
 
@@ -124,13 +137,16 @@ Le namespace est `flagger-demo`. Le cluster s'appelle `flagger-platform-lab`. Fl
 
 ### Déroulé de l'heure
 
-| Minute | Démonstration |
-|---|---|
-| 00–10 | Architecture, rôles de Cilium / Envoy / Flagger |
-| 10–25 | Promotion par poids HTTPRoute |
-| 25–40 | Rollback sur signal applicatif, pas sur readiness |
-| 40–55 | A/B ciblé sur un header |
-| 55–60 | Discussion métriques / GitOps / production |
+Guide à suivre **participant** : [docs/05-tp-participant.md](docs/05-tp-participant.md) (exercices + questions).  
+Fiche **animateur** : [docs/00-formateur.md](docs/00-formateur.md).
+
+| Minute | Qui | Contenu |
+|---|---|---|
+| 00–10 | binôme | Architecture + TP 0 (lire Canary / HTTPRoute) |
+| 10–25 | binôme | TP 1 — `make good` (promotion par poids) |
+| 25–40 | binôme | TP 2 — `make fail` (rollback 5xx) |
+| 40–55 | binôme | TP 3 — `make ab` (cohorte header) |
+| 55–60 | plénière | Limites lab, GitOps / prod, cleanup |
 
 Prévoir **l'installation initiale en amont** : téléchargement des images Kind, Cilium et Envoy Gateway peut dépasser le temps disponible en séance. Les scénarios eux-mêmes sont les 60 minutes de TP.
 
@@ -143,10 +159,12 @@ make cleanup  # supprime uniquement le cluster Kind flagger-platform-lab
 ## Slides, documentation et limites
 
 - [4 slides Marp](slides/flagger-tp.marp.md) — source éditable Markdown.
+- [**TP participant** (exercices à faire soi-même)](docs/05-tp-participant.md).
 - [Déroulé animateur](docs/00-formateur.md).
 - [Architecture](docs/01-architecture.md).
 - [Diagnostic](docs/02-diagnostic.md).
 - [Checklist avant publication publique](docs/03-publication.md).
+- [Vérification devenv + Rancher Moby](docs/04-verification-devenv.md).
 
 Marp n'est pas nécessaire pour **exécuter** le lab. Pour exporter les slides, installer Marp CLI séparément ou utiliser l'extension Marp de VS Code.
 

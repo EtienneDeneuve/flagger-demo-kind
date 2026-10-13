@@ -7,6 +7,7 @@
     jq
     curl
     git
+    python3
   ];
 
   enterShell = ''

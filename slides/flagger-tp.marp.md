@@ -5,52 +5,175 @@ size: 16:9
 paginate: true
 theme: default
 style: |
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+  /* Étienne Deneuve — graphite / ivory / copper (aligné blog) */
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap');
+  :root {
+    --ink: #151819;
+    --graphite: #111416;
+    --graphite-soft: #1b1e20;
+    --paper: #f3efe7;
+    --paper-elevated: #faf8f3;
+    --paper-muted: #e8e3d8;
+    --text-on-dark: #f7f3ec;
+    --text-muted-on-dark: #cdd0cf;
+    --text-subtle-on-dark: #9aa0a3;
+    --copper: #f0aa78;
+    --copper-deep: #a54822;
+    --border-on-dark: rgba(243, 239, 231, 0.16);
+    --border-strong: rgba(243, 239, 231, 0.28);
+    --danger: #f97066;
+    --code-bg: #0e0c0a;
+  }
   section {
-    background: #0A1422;
-    color: #F4F7FA;
-    font-family: 'DM Sans', 'Aptos', sans-serif;
+    background: var(--graphite);
+    color: var(--text-on-dark);
+    font-family: 'Outfit', system-ui, sans-serif;
     padding: 62px 72px 55px;
     font-size: 25px;
   }
-  section::after { color: #6F8196; font-size: 17px; right: 67px; bottom: 32px; }
-  h1, h2, h3 { font-family: 'Space Grotesk', 'Aptos Display', sans-serif; letter-spacing: -.035em; }
-  h1 { color: #F4F7FA; font-size: 55px; line-height: 1.05; margin: 14px 0 22px; }
-  h2 { color: #F4F7FA; font-size: 44px; margin: 10px 0 24px; }
-  h3 { color: #F4F7FA; font-size: 24px; margin: 0 0 10px; }
-  p, li { color: #BFCAD7; line-height: 1.35; }
-  strong { color: #F4F7FA; }
-  code { color: #62E8CF; font-size: .8em; background: #162A3E; padding: .08em .26em; border-radius: 5px; }
-  .eyebrow { color: #5CE0C5; font-size: 16px; font-weight: 700; letter-spacing: .19em; text-transform: uppercase; }
-  .lead { font-size: 29px; line-height: 1.3; color: #BFCAD7; max-width: 1010px; }
-  .accent { color: #5CE0C5; }
-  .rule { border-top: 1px solid #304459; margin: 24px 0; }
+  section::after {
+    color: var(--text-subtle-on-dark);
+    font-size: 16px;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    right: 67px;
+    bottom: 32px;
+  }
+  h1, h2, h3 {
+    font-family: 'Outfit', system-ui, sans-serif;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+  h1 { color: var(--paper); font-size: 54px; line-height: 1.06; margin: 14px 0 22px; }
+  h2 { color: var(--paper); font-size: 42px; margin: 10px 0 24px; line-height: 1.12; }
+  h3 { color: var(--paper); font-size: 23px; margin: 0 0 10px; font-weight: 600; }
+  p, li { color: var(--text-muted-on-dark); line-height: 1.4; }
+  strong { color: var(--paper); font-weight: 600; }
+  code {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    color: var(--copper);
+    font-size: 0.82em;
+    background: var(--code-bg);
+    padding: 0.1em 0.3em;
+    border-radius: 4px;
+    border: 1px solid var(--border-on-dark);
+  }
+  .eyebrow {
+    color: var(--copper);
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .lead {
+    font-size: 28px;
+    line-height: 1.35;
+    color: var(--text-muted-on-dark);
+    max-width: 1010px;
+  }
+  .accent { color: var(--copper); }
+  .mark {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 700;
+    color: var(--paper);
+    letter-spacing: -0.01em;
+  }
+  .rule { border-top: 1px solid var(--border-on-dark); margin: 24px 0; }
   .steps { display: flex; align-items: stretch; gap: 14px; margin-top: 44px; }
-  .step { flex: 1; border: 1px solid #304459; border-radius: 13px; padding: 22px 15px; text-align: center; font-size: 22px; background: #0F2030; color: #EAF1F6; font-weight: 600; }
-  .step.hot { border-color: #36CCB4; background: #0D2A31; color: #79F3DD; }
-  .arrow { font-size: 25px; align-self: center; color: #5D8897; }
-  .bottom { position: absolute; bottom: 67px; left: 73px; font-size: 19px; color: #8C9DAE; }
-  .kpi { display: inline-block; padding: 8px 15px; border: 1px solid #35C8AE; border-radius: 100px; color: #76ECD5; font-size: 17px; font-weight: 600; }
+  .step {
+    flex: 1;
+    border: 1px solid var(--border-on-dark);
+    border-radius: 6px;
+    padding: 22px 15px;
+    text-align: center;
+    font-size: 21px;
+    background: var(--graphite-soft);
+    color: var(--paper);
+    font-weight: 600;
+  }
+  .step.hot {
+    border-color: var(--copper);
+    background: color-mix(in srgb, var(--copper) 12%, var(--graphite-soft));
+    color: var(--copper);
+  }
+  .arrow { font-size: 24px; align-self: center; color: var(--text-subtle-on-dark); }
+  .bottom {
+    position: absolute;
+    bottom: 67px;
+    left: 73px;
+    font-size: 17px;
+    color: var(--text-subtle-on-dark);
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  }
   .cells { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 28px; }
-  .cell { background: #102339; border: 1px solid #264157; border-radius: 13px; padding: 20px 23px; min-height: 123px; }
-  .cell .name { color: #6CEBD5; font-size: 16px; letter-spacing: .10em; font-weight: 700; text-transform: uppercase; }
+  .cell {
+    background: var(--graphite-soft);
+    border: 1px solid var(--border-on-dark);
+    border-radius: 6px;
+    padding: 20px 23px;
+    min-height: 123px;
+  }
+  .cell .name {
+    color: var(--copper);
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  }
   .cell p { margin: 9px 0 0; font-size: 19px; }
   .timeline { display: grid; grid-template-columns: 1.15fr 1.15fr 1.15fr; gap: 16px; margin-top: 42px; }
-  .phase { border-top: 5px solid #61DAC6; background: #102237; padding: 21px 20px 19px; border-radius: 0 0 13px 13px; min-height: 172px; }
-  .phase.warning { border-color: #E6AA6D; }
-  .phase.purple { border-color: #9C9CFF; }
-  .phase .time { font-size: 31px; color: #F5F8FA; font-weight: 700; margin-bottom: 17px; }
-  .phase p { margin: 0; font-size: 21px; }
-  .caption { font-size: 19px; color: #95AAB8; margin-top: 25px; }
-  .demo { display: grid; grid-template-columns: 90px 1fr auto; align-items: center; gap: 20px; border-bottom: 1px solid #2A4456; padding: 22px 0; }
-  .num { color: #5CE0C5; font-size: 37px; font-weight: 700; }
-  .demo .text { font-size: 23px; }
-  .demo .detail { display: block; color: #90A4B7; font-size: 17px; margin-top: 7px; }
-  .cmd { font-family: Menlo, Monaco, monospace; background: #152F3F; color: #70E9CE; border: 1px solid #2D5361; border-radius: 9px; padding: 11px 16px; font-size: 18px; }
+  .phase {
+    border-top: 4px solid var(--copper);
+    background: var(--graphite-soft);
+    padding: 21px 20px 19px;
+    border-radius: 0 0 6px 6px;
+    min-height: 172px;
+  }
+  .phase.warning { border-color: var(--copper-deep); }
+  .phase.muted { border-color: var(--paper-muted); }
+  .phase .time {
+    font-size: 28px;
+    color: var(--paper);
+    font-weight: 700;
+    margin-bottom: 14px;
+    letter-spacing: -0.02em;
+  }
+  .phase p { margin: 0; font-size: 20px; }
+  .caption {
+    font-size: 18px;
+    color: var(--text-subtle-on-dark);
+    margin-top: 25px;
+  }
+  .demo {
+    display: grid;
+    grid-template-columns: 90px 1fr auto;
+    align-items: center;
+    gap: 20px;
+    border-bottom: 1px solid var(--border-on-dark);
+    padding: 22px 0;
+  }
+  .num {
+    color: var(--copper);
+    font-size: 34px;
+    font-weight: 700;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  }
+  .demo .text { font-size: 22px; }
+  .demo .detail { display: block; color: var(--text-subtle-on-dark); font-size: 16px; margin-top: 7px; }
+  .cmd {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    background: var(--code-bg);
+    color: var(--copper);
+    border: 1px solid var(--border-on-dark);
+    border-radius: 4px;
+    padding: 11px 16px;
+    font-size: 17px;
+  }
 ---
 
 <!-- _class: opening -->
-<div class="eyebrow">PLATFORM ENGINEERING · HANDS-ON · 60 MIN</div>
+<div class="eyebrow">Platform engineering · hands-on · 60 min</div>
 
 # Déployer sans parier.
 
@@ -63,11 +186,11 @@ style: |
   <div class="step hot">Flagger</div>
 </div>
 
-<div class="bottom">Gateway API · Prometheus · Podinfo &nbsp;&nbsp; | &nbsp;&nbsp; TP reproductible sur Mac</div>
+<div class="bottom"><span class="mark">ÉD</span> &nbsp;·&nbsp; Gateway API · Prometheus · Podinfo &nbsp;·&nbsp; TP Mac</div>
 
 ---
 
-<div class="eyebrow">01 / ARCHITECTURE</div>
+<div class="eyebrow">01 / Architecture</div>
 
 ## Le trafic devient un signal de décision.
 
@@ -82,21 +205,21 @@ style: |
 
 ---
 
-<div class="eyebrow">02 / PARCOURS · 60 MINUTES</div>
+<div class="eyebrow">02 / Parcours · 60 minutes</div>
 
 ## Trois expériences, un seul cluster.
 
 <div class="timeline">
-  <div class="phase"><div class="time">00–25 min</div><h3>Comprendre & promouvoir</h3><p>Bootstrap, HTTPRoute, trafic progressif de 10 % à 50 %.</p></div>
+  <div class="phase"><div class="time">00–25 min</div><h3>Comprendre & promouvoir</h3><p>Bootstrap, HTTPRoute, trafic progressif 25 % → 50 %.</p></div>
   <div class="phase warning"><div class="time">25–40 min</div><h3>Casser sans crasher</h3><p>Des 5xx réels déclenchent un rollback sur métrique.</p></div>
-  <div class="phase purple"><div class="time">40–55 min</div><h3>Segmenter la beta</h3><p>Routage sélectif sur <code>x-canary: always</code>.</p></div>
+  <div class="phase muted"><div class="time">40–55 min</div><h3>Segmenter la beta</h3><p>Routage sélectif sur <code>x-canary: always</code>.</p></div>
 </div>
 
 <p class="caption">55–60 min : débrief, limites de la démo et implications GitOps. Préchauffer les images avant la séance.</p>
 
 ---
 
-<div class="eyebrow">03 / LES MANIPULATIONS</div>
+<div class="eyebrow">03 / Les manipulations</div>
 
 ## Ce qu'on va voir dans le cluster.
 
@@ -104,4 +227,4 @@ style: |
 <div class="demo"><div class="num">02</div><div class="text"><strong>Rollback en quelques cycles</strong><span class="detail">Le SLI 5xx dépasse 5 % : la primary conserve le trafic.</span></div><div class="cmd">make fail</div></div>
 <div class="demo"><div class="num">03</div><div class="text"><strong>A/B ciblé par header</strong><span class="detail">Le groupe beta voit la canary pendant l'analyse.</span></div><div class="cmd">make ab</div></div>
 
-<p class="caption">À garder ouvert : <code>make port</code> · <code>make traffic</code> · <code>make status</code></p>
+<p class="caption">À garder ouvert : <code>make port</code> · <code>make traffic</code> · <code>make status</code> · <code>make browser</code></p>

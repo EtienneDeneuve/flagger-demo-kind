@@ -14,19 +14,27 @@ Faire un essai à blanc et relever :
 - `./lab kubectl -n flagger-demo get httproute/podinfo` retourne une route acceptée
 - `curl -H 'Host: podinfo.local' http://127.0.0.1:8080/` fonctionne via Envoy
 - `make metrics` : après démarrage de la canary et d'un flux HTTP, le compteur 5xx est disponible
-- Promotion complète en moins de ~6 minutes, rollback en quelques cycles, A/B par header
+- Promotion complète en ~30–60s (intervalle 10s, steps 25→50), rollback en ~20s, A/B par header
+
+Si le Mac formateur utilise **Rancher Desktop (Moby)** + **devenv**, suivre aussi [docs/04-verification-devenv.md](04-verification-devenv.md) (`docker info`, `devenv shell`, `./setup.sh --yes --mode=devenv --no-shell`, `scripts/ci-smoke.sh`).
+
+## Support participant
+
+Exercices : [05-tp-participant.md](05-tp-participant.md) + fichiers sous [manifests/tp/](../manifests/tp/).  
+**Leviers principaux :** `kubectl patch --patch-file` / `kubectl apply -f` — pas `make good|fail|ab` en premier.  
+Les `make *` restent un filet (même YAML) si un binôme est perdu ou pour ta démo de secours.
 
 ## Fil narratif
 
-**0–10 — Le piège du rolling update.** Faire expliquer pourquoi `Ready` ne garantit ni latence ni 5xx. Montrer la slide 2 : Cilium s'occupe du réseau, Envoy du routage, Flagger de la stratégie et Prometheus du verdict.
+**0–10 — Piège rolling update + TP 0.** Ready ≠ digne du trafic. Slide 2. Ils ouvrent `05-canary.yaml` **et** `tp/01-promote-v2.patch.yaml` (qu’est-ce qui change dans le hash ?).
 
-**10–25 — Gagner la confiance progressivement.** Montrer la primary en vert / message « VERSION STABLE ». Lancer `make good`. Laisser tourner le trafic et `make status`. Faire lire les backendRefs de la route Flagger. Attendre la promotion de V2. Question de contrôle : « qu'est-ce qui a changé dans le HTTPRoute, et qui l'a changé ? »
+**10–25 — TP 1.** Ils patchent `01-promote-v2.patch.yaml` eux-mêmes. Status + `backendRefs`. Question : qui a écrit la HTTPRoute ?
 
-**25–40 — Se protéger d'une version qui démarre bien mais répond mal.** Lancer `make fail`, conserver le trafic. Regarder le signal applicatif dans Prometheus puis les événements `Halt` et `Rolling back`. Insister sur la différence entre rollback runtime et revert Git.
+**25–40 — TP 2.** Deux gestes visibles : patch `02-degraded-v3` puis `curl …/fault_injection/enable` sur le Service canary. Halt / Failed. Rollback ≠ git revert. **Pause ~15 s** avant TP 3.
 
-**40–55 — Tester une nouvelle version sur un groupe choisi.** Démarrer `make traffic-ab`, puis `make ab`. Comparer les flux avec/sans header pendant `Progressing`. Expliquer que ce routage ciblé ne survit pas à la promotion.
+**40–55 — TP 3.** `apply 03-ab-canary.yaml` puis patch `03-revision-v4`. Split header/public. Insister : un fichier = stratégie Canary, l’autre = révision app.
 
-**55–60 — Questions, limites et nettoyage.** Recentrer sur Flagger = boucle de contrôle. Dire explicitement que ce lab n'intègre ni alerting, ni GitOps, ni métriques Envoy de bout en bout, ni policies de sécurité. Montrer `make cleanup`.
+**55–60 — Limites + cleanup.** Flagger = boucle de contrôle. Pas d’alerting / GitOps / Envoy E2E / policies sécu.
 
 ## Gestion du temps / secours
 

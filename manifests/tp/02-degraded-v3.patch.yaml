@@ -1,0 +1,30 @@
+# TP 2 — révision « Ready » mais volontairement mauvaise au niveau HTTP.
+# Ce patch ne fait QUE changer le message UI. Les 5xx viennent ensuite de
+# l’API fault injection Podinfo (probes /readyz intactes) — voir le guide TP.
+#
+# 1) Remettre le Canary en mode poids (si tu étais en A/B) :
+#      ./lab kubectl apply -f manifests/05-canary.yaml
+# 2) Demander V3 :
+#      ./lab kubectl -n flagger-demo patch deploy/podinfo --type strategic \
+#        --patch-file manifests/tp/02-degraded-v3.patch.yaml
+# 3) Quand phase=Progressing et le Service canary a des endpoints, activer la panne :
+#      ./lab kubectl -n flagger-demo port-forward svc/podinfo-canary 19898:9898
+#      curl -sS -X POST http://127.0.0.1:19898/fault_injection/enable
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: podinfo
+  namespace: flagger-demo
+spec:
+  template:
+    metadata:
+      annotations:
+        flagger-lab/revision: "v3-degraded"
+    spec:
+      containers:
+        - name: podinfod
+          env:
+            - name: PODINFO_UI_MESSAGE
+              value: "FLAGGER LAB | V3 DEGRADEE"
+            - name: PODINFO_UI_COLOR
+              value: "#D64949"

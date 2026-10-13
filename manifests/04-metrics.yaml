@@ -1,5 +1,11 @@
-# Missing metrics must not be mistaken for good metrics.
-# Canary pod metrics are scraped by prometheus-lab (never primary pod metrics).
+# MetricTemplates Flagger → Prometheus du lab (prometheus-lab).
+#
+# Important pédagogie :
+# - on scrape UNIQUEMENT job=podinfo-canary (jamais la primary) ;
+# - {{ interval }} = Canary metrics[].interval (ici 10s), PAS une fenêtre fixe 1m ;
+#   sinon les 5xx du scénario « fail » restent dans rate() et font échouer l’A/B suivant.
+#
+# Docs : docs/01-architecture.md, docs/05-tp-participant.md (TP 0 / pause post-TP2).
 apiVersion: flagger.app/v1beta1
 kind: MetricTemplate
 metadata:
@@ -11,11 +17,12 @@ spec:
     address: http://prometheus-lab.flagger-system.svc.cluster.local:9090
   query: |
     100 * (
-      (sum(rate(http_requests_total{job="podinfo-canary",status=~"5.."}[1m])) or vector(0))
+      (sum(rate(http_requests_total{job="podinfo-canary",status=~"5.."}[{{ interval }}])) or vector(0))
       /
-      clamp_min((sum(rate(http_requests_total{job="podinfo-canary"}[1m])) or vector(0)), 0.001)
+      clamp_min((sum(rate(http_requests_total{job="podinfo-canary"}[{{ interval }}])) or vector(0)), 0.001)
     )
 ---
+# Sans scrape canary « up », une absence de série ne doit pas passer pour « 0 % d’erreurs ».
 apiVersion: flagger.app/v1beta1
 kind: MetricTemplate
 metadata:

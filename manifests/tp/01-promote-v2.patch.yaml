@@ -1,0 +1,28 @@
+# TP 1 — nouvelle révision « saine ».
+# Flagger ne regarde PAS le tag d’image seul : il compare le hash du pod template.
+# Changer message UI + annotation → nouveau hash → analyse canary (poids 25→50).
+#
+# Appliquer :
+#   ./lab kubectl -n flagger-demo patch deploy/podinfo --type strategic \
+#     --patch-file manifests/tp/01-promote-v2.patch.yaml
+#
+# Si tu relances le même fichier sans changer l’annotation, Flagger peut ignorer
+# (hash identique). Bumpe alors flagger-lab/revision (ex. v2-b).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: podinfo
+  namespace: flagger-demo
+spec:
+  template:
+    metadata:
+      annotations:
+        flagger-lab/revision: "v2"
+    spec:
+      containers:
+        - name: podinfod
+          env:
+            - name: PODINFO_UI_MESSAGE
+              value: "FLAGGER LAB | V2 VALIDEE"
+            - name: PODINFO_UI_COLOR
+              value: "#16A085"

@@ -62,14 +62,12 @@ fi
 bash "$ROOT/scripts/install-tools.sh"
 
 if [[ "$WITH_CLUSTER" == 1 ]]; then
-  # Only Docker/Colima/OrbStack is outside the project toolchain.
+  # Only the container engine is outside the project toolchain.
+  # shellcheck source=scripts/_common.sh
+  source "$ROOT/scripts/_common.sh"
+  ensure_docker_cli || true
   if ! command -v docker >/dev/null 2>&1; then
-    if [[ -x /Applications/Docker.app/Contents/Resources/bin/docker ]]; then
-      export PATH="/Applications/Docker.app/Contents/Resources/bin:$PATH"
-    fi
-  fi
-  if ! command -v docker >/dev/null 2>&1; then
-    echo "Docker CLI not found. Install/start Docker Desktop, OrbStack or Docker+Colima." >&2
+    echo "Docker CLI not found. Install/start Docker Desktop, OrbStack, Rancher Desktop (Moby) or Docker+Colima." >&2
     exit 2
   fi
   if ! docker info >/dev/null 2>&1; then
@@ -77,9 +75,13 @@ if [[ "$WITH_CLUSTER" == 1 ]]; then
       answer="$(ask 'Container engine stopped. Start installed Colima? [y/N]' N)"
       case "$answer" in y|Y|yes|YES) colima start;; esac
     fi
+    if command -v rdctl >/dev/null 2>&1 && [[ "$interactive" == 1 ]]; then
+      answer="$(ask 'Container engine stopped. Start installed Rancher Desktop? [y/N]' N)"
+      case "$answer" in y|Y|yes|YES) rdctl start --container-engine.name=moby || true;; esac
+    fi
   fi
   if ! docker info >/dev/null 2>&1; then
-    echo "Container engine unavailable. Start Docker Desktop/OrbStack/Colima and retry." >&2
+    echo "Container engine unavailable. Start Docker Desktop/OrbStack/Rancher Desktop (Moby)/Colima and retry." >&2
     exit 2
   fi
   bash "$ROOT/scripts/bootstrap.sh"

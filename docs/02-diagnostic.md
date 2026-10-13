@@ -32,11 +32,22 @@ Verifier que `make traffic` tourne et que le tunnel Envoy est actif. Ne pas conf
 
 ## "Port 8080 already in use"
 
-Un `kubectl port-forward` est deja actif ; l'arreter dans son terminal, puis relancer `make port`. Le script occupe 8080 localement.
+Si `curl -H 'Host: podinfo.local' http://127.0.0.1:8080/` repond deja, le tunnel est bon : `make port` le reutilise et sort OK. Sinon liberer le port (`kill $(lsof -tiTCP:8080 -sTCP:LISTEN)`) puis `make port`.
 
-## Le reset ne marche pas
+## Canary reste Failed / recover qui n'avance pas
 
-Chaque scenario doit demarrer apres la phase `Succeeded` ou `Failed` du precedent. Rejouer `make up` sur le cluster ne reinitialise pas les images de Flagger en cours. Pour repartir de zero : `make cleanup && make up`.
+Flagger ne regarde **pas** les annotations metadata du Deployment : il faut un nouveau hash de **pod template** (env, image, annotation sous `spec.template`). `ci-smoke` fait un soft patch puis, si besoin, recreate le Canary.
+
+```bash
+# Soft
+./lab kubectl -n flagger-demo patch deploy/podinfo --type strategic \
+  -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"flagger-lab/reset\":\"$(date +%s)\"}}}}}"
+# Hard lab
+./lab kubectl -n flagger-demo delete canary/podinfo
+./lab kubectl apply -f manifests/02-podinfo.yaml -f manifests/05-canary.yaml
+```
+
+Sinon repartir de zero : `make cleanup && make up`.
 
 ## Verifier le binaire Podinfo
 
