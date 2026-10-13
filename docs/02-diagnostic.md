@@ -2,6 +2,18 @@
 
 **Français** · **[English](en/02-diagnostic.md)**
 
+## Sans Nix / « ça marchait avec devenv »
+
+Le lab n’exige pas Nix. Contrôle rapide :
+
+```bash
+./setup.sh --mode=local --tools-only   # ou setup complet
+./scripts/shell.sh                     # ou make doctor depuis le dépôt
+make doctor                            # kind/kubectl/helm/cilium doivent être sous .tools/bin
+```
+
+Si `make browser` échoue sur `python3` : utiliser `curl -H 'Host: podinfo.local' http://127.0.0.1:8080/` (ou installer un Python 3 système). Vérif bout-en-bout : `bash scripts/verify-local-demo.sh`.
+
 ## Le Mac n'accede pas a l'IP LoadBalancer de la Gateway
 
 Comportement attendu avec Docker Desktop : le reseau Kind vit dans une VM Linux. Utiliser `make port`, puis `curl -H 'Host: podinfo.local' http://127.0.0.1:8080/`. Ne pas modifier `/etc/hosts` ni le routage macOS.

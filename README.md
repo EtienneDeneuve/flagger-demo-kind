@@ -50,25 +50,31 @@ flagger-demo-kind/
 ```
 
 
-### Sans Nix
+### Sans Nix (parcours par défaut)
 
-`./setup.sh` sélectionne automatiquement `zsh -f` s'il n'y a pas de `devenv`. Le shell n'édite aucun profil utilisateur. Pour l'ouvrir plus tard :
+**Nix / devenv ne sont pas requis.** Si `devenv` est absent, `./setup.sh` en mode `auto` prend le shell local. Même contrat que devenv : `KUBECONFIG` + CLI sous `.tools/bin` via `scripts/_common.sh`.
 
 ```bash
-./scripts/shell.sh
+./setup.sh --mode=local      # force le parcours sans Nix
+./scripts/shell.sh           # zsh isolé (-f), rouvre le lab
+make doctor                  # depuis n’importe quel terminal du dépôt
 ```
 
-Les commandes `make ...` fonctionnent **aussi depuis un terminal normal** : chacune charge les chemins et la configuration privés du dépôt. Pour une commande `kubectl` isolée depuis n'importe quel terminal, utiliser **`./lab kubectl ...`**. Le wrapper refuse d'agir si le contexte attendu n'est pas celui du TP.
+Les `make ...` fonctionnent **depuis un terminal normal** (chaque script source `_common.sh`). Pour un `kubectl` isolé : **`./lab kubectl ...`** (refuse un mauvais contexte).
+
+`make browser` utilise `python3` (souvent `/usr/bin/python3` sur macOS). Sinon : `curl -H 'Host: podinfo.local' http://127.0.0.1:8080/`.
+
+Vérif formateur sans Nix : `bash scripts/verify-local-demo.sh`.
 
 ### Avec devenv (facultatif)
 
-Si `devenv` est déjà présent, `./setup.sh` entre dans `devenv shell` après installation. `devenv.yaml` épingle un commit nixpkgs ; `devenv.nix` ajoute `zsh`, `jq`, `curl`, `git`. **Les CLI Kubernetes proviennent toujours de `.tools/bin`** pour garantir la même expérience dans les deux modes. Nix n'est ni installé ni mis à jour pour les participants.
+Si `devenv` est déjà présent, `auto` peut l’utiliser. `devenv.nix` n’ajoute que du confort (`zsh`, `jq`, `curl`, `git`, `python3`). **kind / kubectl / helm / cilium restent dans `.tools/bin`** — même versions que le mode local. Nix n’est ni installé ni mis à jour pour les participants.
 
 ```bash
-./setup.sh --mode=devenv      # utilise devenv s'il existe
-./setup.sh --mode=local       # force le zsh isolé, même avec Nix
-./setup.sh --tools-only      # prépare les CLI sans créer le cluster
-./setup.sh --yes             # mode automatisé, sans shell interactif
+./setup.sh --mode=devenv     # uniquement si devenv est déjà installé
+./setup.sh --mode=local      # force le zsh isolé, même avec Nix sur la machine
+./setup.sh --tools-only      # CLI seules, pas de cluster
+./setup.sh --yes             # non interactif, sans shell
 ./setup.sh --help
 ```
 

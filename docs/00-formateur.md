@@ -19,7 +19,8 @@ Faire un essai à blanc et relever :
 - `make metrics` : après démarrage de la canary et d'un flux HTTP, le compteur 5xx est disponible
 - Promotion complète en ~30–60s (intervalle 10s, steps 25→50), rollback en ~20s, A/B par header
 
-Si le Mac formateur utilise **Rancher Desktop (Moby)** + **devenv**, suivre aussi [docs/04-verification-devenv.md](04-verification-devenv.md) (`docker info`, `devenv shell`, `./setup.sh --yes --mode=devenv --no-shell`, `scripts/ci-smoke.sh`).
+Essai à blanc **sans Nix** (chemin participants) : `bash scripts/verify-local-demo.sh`.  
+Si le Mac formateur utilise **Rancher Desktop (Moby)** + **devenv**, voir aussi [docs/04-verification-devenv.md](04-verification-devenv.md).
 
 ## Support participant
 

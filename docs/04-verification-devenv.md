@@ -2,6 +2,9 @@
 
 Compte rendu du 13 octobre 2026 sur le Mac formateur (Apple Silicon).
 
+> **Participants sans Nix :** utiliser `bash scripts/verify-local-demo.sh` (ou `./setup.sh --mode=local`).  
+> devenv est un confort formateur ; le contrat lab (`.tools/bin` + KUBECONFIG privé) est identique.
+
 ## Contexte machine
 
 | Élément | État observé |
