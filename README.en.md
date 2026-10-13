@@ -2,7 +2,7 @@
 
 **[Français](README.md)** · English
 
-**60-minute macOS workshop · 4 Marp slides · hands-on YAML (not just `make`).**
+**60-minute macOS workshop · guided Marp slides · hands-on YAML (not just `make`).**
 
 Kubernetes can roll pods. Flagger decides whether a new revision **deserves more traffic**, using Prometheus metrics and Gateway API `HTTPRoute` weights. Traffic is served by Envoy Gateway; Cilium is the only CNI. **No Istio, no extra service mesh.**
 

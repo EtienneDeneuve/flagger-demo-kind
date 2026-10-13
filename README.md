@@ -2,7 +2,7 @@
 
 **Français** · **[English](README.en.md)**
 
-**TP macOS de 60 minutes · 4 slides Marp · YAML à appliquer (pas seulement `make`).**
+**TP macOS de 60 minutes · slides Marp (parcours guidé) · YAML à appliquer (pas seulement `make`).**
 
 Page projet (site) : [etienne.deneuve.xyz/projects/flagger-demo-kind](https://etienne.deneuve.xyz/projects/flagger-demo-kind/).  
 **Ouverture publique du dépôt :** 13 octobre 2026, **10h30** (Europe/Paris).
@@ -163,7 +163,7 @@ make cleanup  # supprime uniquement le cluster Kind flagger-platform-lab
 
 ## Slides, documentation et limites
 
-- [4 slides Marp](slides/flagger-tp.marp.md) — source éditable Markdown.
+- [Slides Marp](slides/flagger-tp.marp.md) — parcours TP (Ready ≠ confiance, boucle, TP 0–3).
 - [**TP participant**](docs/05-tp-participant.md) · [English](docs/en/05-tp-participant.md).
 - [Déroulé animateur](docs/00-formateur.md).
 - [Architecture](docs/01-architecture.md) · [English](docs/en/01-architecture.md).
