@@ -18,15 +18,22 @@ permissions:
 jobs:
   macos-toolchain:
     name: macOS CLI installer — existing tools untouched
-    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [macos-15, macos-15-intel]
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Install project-owned pinned binaries
-        run: bash scripts/install-tools.sh
+      - name: Install tools via the participant's setup entrypoint
+        run: |
+          bash setup.sh --yes --tools-only --mode=local
+          bash setup.sh --yes --tools-only --mode=auto
       - name: Verify binaries and paths
         run: |
           set -euo pipefail
+          uname -sm
           test -x .tools/bin/kind
           test -x .tools/bin/kubectl
           test -x .tools/bin/helm

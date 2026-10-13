@@ -92,7 +92,21 @@ bash "$ROOT_DIR/scripts/ab.sh"
 wait_phase Progressing
 kubectl -n "$LAB_NS" get httproute podinfo -o yaml >"$out/ab-route.yaml"
 grep -q 'x-canary' "$out/ab-route.yaml" || { echo "Header routing was not reconciled" >&2; exit 1; }
-wait_http http://127.0.0.1:8080/ "x-canary: always"
+echo "Verifying that only the beta cohort sees V4 while public traffic stays on V2"
+matched=0
+for i in $(seq 1 90); do
+  internal="$(curl --max-time 3 -fsS -H 'Host: podinfo.local' -H 'x-canary: always' http://127.0.0.1:8080/api/info || true)"
+  public="$(curl --max-time 3 -fsS -H 'Host: podinfo.local' http://127.0.0.1:8080/api/info || true)"
+  if [[ "$internal" == *'V4 BETA'* && "$public" == *'V2 VALIDEE'* ]]; then
+    matched=1
+    break
+  fi
+  sleep 2
+done
+if (( matched == 0 )); then
+  echo "A/B cohort separation never observed" >&2
+  exit 1
+fi
 wait_promoted 'FLAGGER LAB | V4 BETA'
 
 echo "PASS: gateway, traffic, promotion, metric-driven rollback, A/B, private kubeconfig"
