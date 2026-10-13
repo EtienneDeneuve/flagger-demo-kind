@@ -1,4 +1,6 @@
-# Routage selective de la cohorte x-canary=always pendant la phase Progressing.
+# Canary « A/B » (copie de référence bootstrap).
+# En séance TP, préférer manifests/tp/03-ab-canary.yaml (même contenu, guide dédié).
+# Pendant Progressing : seul x-canary: always voit la canary ; après promote, plus de match.
 apiVersion: flagger.app/v1beta1
 kind: Canary
 metadata:
@@ -21,10 +23,12 @@ spec:
       - name: lab-gateway
         namespace: flagger-demo
   analysis:
-    interval: 30s
-    threshold: 3
-    iterations: 6
+    interval: 10s
+    threshold: 2
+    # Nombre de cycles d’analyse réussis avant promote (au lieu de poids 25→50).
+    iterations: 4
     match:
+      # Trafic SANS ce header → 100 % primary pendant l’analyse.
       - headers:
           x-canary:
             exact: always
@@ -35,11 +39,11 @@ spec:
           namespace: flagger-system
         thresholdRange:
           max: 5
-        interval: 30s
+        interval: 10s
       - name: podinfo-canary-scrape-up
         templateRef:
           name: podinfo-canary-scrape-up
           namespace: flagger-system
         thresholdRange:
           min: 1
-        interval: 30s
+        interval: 10s

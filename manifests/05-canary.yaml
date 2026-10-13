@@ -1,41 +1,53 @@
+# Canary « progressive » (poids HTTPRoute).
+# Flagger surveille Deployment/podinfo, crée Services + HTTPRoute, et avance
+# le trafic canary tant que les métriques restent dans les seuils.
+#
+# Voir aussi : manifests/06-canary-ab.yaml (même objet, mode A/B par header).
+# Docs participant : docs/05-tp-participant.md — TP 1.
 apiVersion: flagger.app/v1beta1
 kind: Canary
 metadata:
   name: podinfo
   namespace: flagger-demo
 spec:
+  # Gateway API v1 via Envoy Gateway (pas Istio / pas mesh).
   provider: gatewayapi:v1
   targetRef:
     apiVersion: apps/v1
     kind: Deployment
     name: podinfo
+  # Au-delà : Flagger abandonne (ProgressDeadlineExceeded).
   progressDeadlineSeconds: 180
   service:
     port: 9898
     targetPort: 9898
     portName: http
+    # Doit coller au listener Gateway (manifests/01-gateway.yaml).
     hosts:
       - podinfo.local
     gatewayRefs:
       - name: lab-gateway
         namespace: flagger-demo
   analysis:
-    interval: 30s
-    threshold: 3
-    maxWeight: 50
-    stepWeight: 10
+    # Timings lab : assez courts pour une démo live, assez longs pour lire les poids.
+    interval: 10s          # pause entre chaque palier / check métrique
+    threshold: 2           # N checks métriques en échec → rollback
+    maxWeight: 50          # plafond canary avant promotion de la primary
+    stepWeight: 25         # 0 → 25 → 50 %, puis copy vers primary
     metrics:
+      # Taux 5xx sur les pods canary uniquement (jamais la primary).
       - name: podinfo-canary-error-rate
         templateRef:
           name: podinfo-canary-error-rate
           namespace: flagger-system
         thresholdRange:
-          max: 5
-        interval: 30s
+          max: 5           # % — au-dessus → Halt / Failed
+        interval: 10s      # injecté dans le PromQL via {{ interval }}
+      # Garde-fou : au moins un scrape Prometheus canary « up ».
       - name: podinfo-canary-scrape-up
         templateRef:
           name: podinfo-canary-scrape-up
           namespace: flagger-system
         thresholdRange:
           min: 1
-        interval: 30s
+        interval: 10s

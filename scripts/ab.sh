@@ -1,9 +1,18 @@
 #!/usr/bin/env bash
+# TP 3 — apply manifests/tp/03-ab-canary.yaml + patch 03-revision-v4.
+# Participant : docs/05-tp-participant.md
 set -euo pipefail
 source "$(dirname "$BASH_SOURCE")/_common.sh"
 require_context
-kubectl apply -f "$ROOT_DIR/manifests/06-canary-ab.yaml"
-kubectl -n "$LAB_NS" set env deployment/podinfo \
-  PODINFO_UI_MESSAGE='FLAGGER LAB | V4 BETA' \
-  PODINFO_UI_COLOR='#8C62D6'
-echo 'A/B active while Progressing: start make traffic-ab in another terminal.'
+
+kubectl apply -f "$ROOT_DIR/manifests/tp/03-ab-canary.yaml" >/dev/null
+
+patch="$(mktemp)"
+trap 'rm -f "$patch"' EXIT
+sed "s/flagger-lab\\/revision: \"v4-beta\"/flagger-lab\\/revision: \"v4-$(date +%s)\"/" \
+  "$ROOT_DIR/manifests/tp/03-revision-v4.patch.yaml" >"$patch"
+kubectl -n "$LAB_NS" patch deployment/podinfo --type strategic --patch-file "$patch" >/dev/null
+
+log_ok "A/B V4 : Canary match header + révision (manifests/tp/03-*)"
+log_info "pendant Progressing: make traffic-ab  · sans header = primary"
+log_info "à la main: apply 03-ab-canary.yaml puis patch 03-revision-v4.patch.yaml"

@@ -1,0 +1,56 @@
+# TP 3 — même Canary, autre stratégie d’analyse : match header au lieu de poids.
+# C’est un vrai objet cluster (apply), pas un patch Deployment.
+#
+#   ./lab kubectl apply -f manifests/tp/03-ab-canary.yaml
+#
+# Effet : pendant Progressing, seul le trafic avec
+#   Header: x-canary: always
+# atteint la canary. Le reste reste sur primary.
+# Après Succeeded, Flagger retire le match — tout le monde est sur primary.
+#
+# Identique pédagogiquement à manifests/06-canary-ab.yaml (copie commentée pour le TP).
+apiVersion: flagger.app/v1beta1
+kind: Canary
+metadata:
+  name: podinfo
+  namespace: flagger-demo
+spec:
+  provider: gatewayapi:v1
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: podinfo
+  progressDeadlineSeconds: 180
+  service:
+    port: 9898
+    targetPort: 9898
+    portName: http
+    hosts:
+      - podinfo.local
+    gatewayRefs:
+      - name: lab-gateway
+        namespace: flagger-demo
+  analysis:
+    interval: 10s
+    threshold: 2
+    # Plus de stepWeight : on compte des cycles d’analyse réussis.
+    iterations: 4
+    match:
+      - headers:
+          x-canary:
+            exact: always
+    metrics:
+      - name: podinfo-canary-error-rate
+        templateRef:
+          name: podinfo-canary-error-rate
+          namespace: flagger-system
+        thresholdRange:
+          max: 5
+        interval: 10s
+      - name: podinfo-canary-scrape-up
+        templateRef:
+          name: podinfo-canary-scrape-up
+          namespace: flagger-system
+        thresholdRange:
+          min: 1
+        interval: 10s

@@ -1,4 +1,11 @@
-# Flagger gere les Services et la HTTPRoute ; ne pas les creer manuellement.
+# Deployment « target » observé par Flagger.
+# Flagger crée ensuite : podinfo-primary, Services, HTTPRoute — ne pas les créer à la main.
+#
+# PODINFO_UI_MESSAGE / COLOR = signal visible dans make browser / curl /api/info
+# (VERSION STABLE → V2 → V3 dégradée → V4 beta selon les scénarios).
+#
+# command: ["./podinfo"] est requis : l’image définit CMD, et Kubernetes
+# remplacerait autrement le binaire si seuls args étaient fournis.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -18,6 +25,7 @@ spec:
       labels:
         app: podinfo
       annotations:
+        # Scrapé par prometheus-lab (voir manifests/03-prometheus.yaml).
         prometheus.io/scrape: "true"
         prometheus.io/port: "9797"
     spec:
@@ -31,6 +39,7 @@ spec:
             - --port-metrics=9797
             - --grpc-port=9999
             - --level=info
+            # Erreurs aléatoires désactivées : le TP 2 injecte les 5xx via l’API fault.
             - --random-error=false
           env:
             - name: PODINFO_UI_MESSAGE
@@ -42,6 +51,7 @@ spec:
               containerPort: 9898
             - name: http-metrics
               containerPort: 9797
+          # Ready ≠ « bon pour 100 % du trafic » — c’est tout l’intérêt de Flagger (TP 2).
           readinessProbe:
             httpGet:
               path: /readyz

@@ -1,0 +1,26 @@
+# TP 3 — révision réservée à la cohorte beta (après apply de 03-ab-canary.yaml).
+#
+#   ./lab kubectl -n flagger-demo patch deploy/podinfo --type strategic \
+#     --patch-file manifests/tp/03-revision-v4.patch.yaml
+#
+# Vérifier le split pendant Progressing :
+#   curl -H 'Host: podinfo.local' -H 'x-canary: always' http://127.0.0.1:8080/api/info
+#   curl -H 'Host: podinfo.local' http://127.0.0.1:8080/api/info
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: podinfo
+  namespace: flagger-demo
+spec:
+  template:
+    metadata:
+      annotations:
+        flagger-lab/revision: "v4-beta"
+    spec:
+      containers:
+        - name: podinfod
+          env:
+            - name: PODINFO_UI_MESSAGE
+              value: "FLAGGER LAB | V4 BETA"
+            - name: PODINFO_UI_COLOR
+              value: "#8C62D6"
