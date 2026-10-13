@@ -88,7 +88,14 @@ if [[ "$WITH_CLUSTER" == 1 ]]; then
 fi
 
 echo
-echo "Ready. To reopen the local lab later: ./scripts/shell.sh"
+echo "Ready."
+if [[ "$MODE" == devenv ]]; then
+  echo "  Reopen later:  devenv shell"
+  echo "  Force no-Nix:  ./setup.sh --mode=local   then  ./scripts/shell.sh"
+else
+  echo "  Reopen later:  ./scripts/shell.sh   (isolated zsh, no Nix required)"
+  echo "  Tip: make * works from any terminal once .tools/bin exists (scripts load _common.sh)."
+fi
 if [[ "$WITH_SHELL" == 1 ]]; then
   if [[ "$MODE" == devenv ]]; then
     exec devenv shell

@@ -2,6 +2,18 @@
 
 **[Français](../02-diagnostic.md)** · English
 
+## Without Nix / “it worked under devenv”
+
+Nix is not required. Quick check:
+
+```bash
+./setup.sh --mode=local --tools-only
+./scripts/shell.sh
+make doctor   # kind/kubectl/helm/cilium must live under .tools/bin
+```
+
+If `make browser` fails on `python3`, use `curl -H 'Host: podinfo.local' http://127.0.0.1:8080/`. Full path: `bash scripts/verify-local-demo.sh`.
+
 ## Mac cannot reach the Gateway LoadBalancer IP
 
 Expected with Docker Desktop: Kind’s network lives in a Linux VM. Use `make port`, then `curl -H 'Host: podinfo.local' http://127.0.0.1:8080/`. Do not edit `/etc/hosts` or macOS routing unless you choose to.

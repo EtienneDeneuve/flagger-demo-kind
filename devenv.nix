@@ -1,13 +1,14 @@
 { pkgs, ... }:
 {
-  # Quality-of-life tools come from pinned nixpkgs. Kubernetes CLIs still come
-  # from ./setup.sh into .tools/bin, so Nix and non-Nix participants match.
+  # Optional QoL only. Participants WITHOUT Nix use ./scripts/shell.sh — same
+  # KUBECONFIG / .tools/bin contract (see scripts/_common.sh). Never put kind /
+  # kubectl / helm / cilium here: setup.sh pins them into .tools/bin for both modes.
   packages = with pkgs; [
     zsh
     jq
     curl
     git
-    python3
+    python3 # make browser; local mode uses macOS /usr/bin/python3 instead
   ];
 
   enterShell = ''
@@ -17,5 +18,6 @@
     export HELM_CACHE_HOME="$PWD/.tools/helm/cache"
     export HELM_DATA_HOME="$PWD/.tools/helm/data"
     echo "Flagger lab | devenv | private KUBECONFIG | pinned local Kubernetes tools"
+    echo "  (same contract as ./scripts/shell.sh — Nix is optional)"
   '';
 }

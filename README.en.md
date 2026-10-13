@@ -21,9 +21,11 @@ cd flagger-demo-kind
 ./setup.sh
 ```
 
-The script asks **3 questions** (sensible defaults): shell mode, create Kind cluster, open the lab shell. It never silently installs Docker or edits your `~/.zshrc` / `~/.kube/config`.
+The script asks **3 questions** (sensible defaults): shell mode, create Kind cluster, open the lab shell. It never silently installs Docker, Nix, or edits your `~/.zshrc` / `~/.kube/config`.
 
-Pinned `kind` / `kubectl` / `helm` / `cilium` land in `.tools/bin/` with SHA-256 checks. Use `./lab kubectl …` for an isolated context.
+**Nix is optional.** Default path without devenv: `./setup.sh --mode=local` then `./scripts/shell.sh`. Same contract as devenv: private `KUBECONFIG` + pinned CLIs in `.tools/bin/`. `make …` works from a normal terminal (scripts source `_common.sh`). Use `./lab kubectl …` for an isolated kubectl. Facilitator check without Nix: `bash scripts/verify-local-demo.sh`.
+
+`make browser` needs `python3` (typically macOS `/usr/bin/python3`); otherwise use `curl -H 'Host: podinfo.local'`.
 
 ## Demo terminals
 
