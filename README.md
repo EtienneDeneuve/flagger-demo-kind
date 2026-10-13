@@ -11,7 +11,7 @@ Kubernetes sait effectuer un rolling update. Flagger décide si une nouvelle ver
 
 ## Démarrage : cloner, un script, terminé
 
-Prérequis externes : **macOS Apple Silicon ou Intel**, `git`, `curl`, un moteur de conteneurs compatible Docker (Docker Desktop, OrbStack, **Rancher Desktop en mode Moby**, ou Colima) **déjà installé et démarré**, environ **8 Go de RAM alloués** (12 Go recommandés) et un accès Internet pour les images. Avec Rancher, laisser Kubernetes intégré désactivé (Kind porte le cluster) et s’assurer que `docker` répond (`~/.rd/bin` est ajouté automatiquement si le PATH est en mode manual).
+Prérequis externes : **macOS Apple Silicon ou Intel**, `git`, `curl`, un moteur de conteneurs compatible Docker (Docker Desktop, OrbStack, **Rancher Desktop en mode Moby**, ou Colima) **déjà installé et démarré**, environ **8 Go de RAM alloués** (12 Go recommandés) et un accès Internet pour les images. Avec Rancher, laisser Kubernetes intégré désactivé (Kind porte le cluster) et s’assurer que `docker` répond (`~/.rd/bin` est ajouté si besoin, **sans** laisser le `kubectl`/`helm` Rancher passer devant `.tools/bin`).
 
 ```bash
 git clone https://github.com/EtienneDeneuve/flagger-demo-kind.git
@@ -46,7 +46,7 @@ flagger-demo-kind/
 ├── manifests/tp/         # YAML TP à patch/apply soi-même (anti-magique)
 ├── scripts/              # raccourcis make (= mêmes fichiers tp/)
 ├── docs/                 # formateur, participant, diagnostic
-└── slides/               # quatre slides Marp
+└── slides/               # slides Marp
 ```
 
 
@@ -180,6 +180,6 @@ make cleanup  # supprime uniquement le cluster Kind flagger-platform-lab
 
 Marp n'est pas nécessaire pour **exécuter** le lab. Pour exporter les slides, installer Marp CLI séparément ou utiliser l'extension Marp de VS Code.
 
-**Niveau de vérification :** la CI vérifie Bash et YAML. Le cluster complet n'a **pas encore été exécuté de bout en bout sur un Mac de participant** ; un essai à blanc est obligatoire avant la séance. Le repo est un support pédagogique, pas un template production. Les outils locaux sont limités au dossier du dépôt ; l'exécution de Kind créera en revanche les conteneurs Docker nommés du lab.
+**Niveau de vérification :** la CI valide Bash/YAML et joue un E2E Kind+Cilium+Envoy+Flagger sur Linux. Un essai à blanc **sans Nix** sur Mac (`bash scripts/verify-local-demo.sh`) reste obligatoire avant la séance. Le repo est un support pédagogique, pas un template production. Les outils locaux sont limités au dossier du dépôt ; l'exécution de Kind créera en revanche les conteneurs Docker nommés du lab.
 
 Sources : [Kind](https://kind.sigs.k8s.io/), [Cilium](https://docs.cilium.io/en/stable/), [Envoy Gateway](https://gateway.envoyproxy.io/), [Flagger Gateway API](https://docs.flagger.app/tutorials/gatewayapi-progressive-delivery), [Podinfo](https://github.com/stefanprodan/podinfo), [devenv](https://devenv.sh/).

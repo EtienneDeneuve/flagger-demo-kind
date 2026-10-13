@@ -13,7 +13,7 @@ Project page: [etienne.deneuve.xyz/projects/flagger-demo-kind](https://etienne.d
 
 ## Quick start
 
-**Prerequisites:** macOS (Apple Silicon or Intel), `git`, `curl`, a running Docker-compatible engine (Docker Desktop, OrbStack, **Rancher Desktop in Moby mode**, or Colima), ~8 GB RAM for the engine (12 GB recommended), and network access for images.
+**Prerequisites:** macOS (Apple Silicon or Intel), `git`, `curl`, a running Docker-compatible engine (Docker Desktop, OrbStack, **Rancher Desktop in Moby mode**, or Colima), ~8 GB RAM for the engine (12 GB recommended), and network access for images. With Rancher, leave built-in Kubernetes off (Kind owns the cluster). Lab scripts may add `~/.rd/bin` for `docker`, but keep pinned `kubectl`/`helm` from `.tools/bin` ahead of Rancher’s copies (`make doctor` must show `.tools/bin`).
 
 ```bash
 git clone https://github.com/EtienneDeneuve/flagger-demo-kind.git
