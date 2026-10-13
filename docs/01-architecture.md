@@ -1,5 +1,7 @@
 # Architecture technique et compromis
 
+**Français** · **[English](en/01-architecture.md)**
+
 ```text
 Mac macOS (curl / Marp)
        |

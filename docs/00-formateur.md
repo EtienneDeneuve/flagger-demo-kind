@@ -1,5 +1,8 @@
 # Fiche animateur — 60 minutes
 
+Guide participant (FR) : [05-tp-participant.md](05-tp-participant.md) · (EN) : [en/05-tp-participant.md](en/05-tp-participant.md).  
+Ouverture publique : [03-publication.md](03-publication.md).
+
 ## Objectif à dire à l'oral (60 secondes)
 
 « Kubernetes sait remplacer des pods, mais ne sait pas décider seul si une version mérite 100 % du trafic. Flagger observe le Deployment, pilote les poids d'un HTTPRoute via Envoy Gateway et vérifie un SLI Prometheus. Le test de ce soir porte sur la décision, pas sur le YAML. »

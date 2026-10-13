@@ -1,6 +1,10 @@
 # Flagger Demo Kind — progressive delivery avec Cilium et Envoy Gateway
 
-**TP macOS de 60 minutes · 4 slides Marp · 3 démonstrations.**
+**Français** · **[English](README.en.md)**
+
+**TP macOS de 60 minutes · 4 slides Marp · YAML à appliquer (pas seulement `make`).**
+
+Page projet (site) : [etienne.deneuve.xyz/projects/flagger-demo-kind](https://etienne.deneuve.xyz/projects/flagger-demo-kind/) (après ouverture publique).
 
 Kubernetes sait effectuer un rolling update. Flagger décide si une nouvelle version **mérite de recevoir davantage de trafic**, en analysant des métriques Prometheus et en modifiant les poids d'un HTTPRoute Gateway API. Le trafic est servi par Envoy Gateway ; Cilium est l'unique CNI. **Aucun Istio, aucun service mesh supplémentaire.**
 
@@ -159,12 +163,13 @@ make cleanup  # supprime uniquement le cluster Kind flagger-platform-lab
 ## Slides, documentation et limites
 
 - [4 slides Marp](slides/flagger-tp.marp.md) — source éditable Markdown.
-- [**TP participant** (exercices à faire soi-même)](docs/05-tp-participant.md).
+- [**TP participant**](docs/05-tp-participant.md) · [English](docs/en/05-tp-participant.md).
 - [Déroulé animateur](docs/00-formateur.md).
-- [Architecture](docs/01-architecture.md).
-- [Diagnostic](docs/02-diagnostic.md).
-- [Checklist avant publication publique](docs/03-publication.md).
+- [Architecture](docs/01-architecture.md) · [English](docs/en/01-architecture.md).
+- [Diagnostic](docs/02-diagnostic.md) · [English](docs/en/02-diagnostic.md).
+- [Checklist ouverture publique](docs/03-publication.md).
 - [Vérification devenv + Rancher Moby](docs/04-verification-devenv.md).
+- [Contributing](CONTRIBUTING.md).
 
 Marp n'est pas nécessaire pour **exécuter** le lab. Pour exporter les slides, installer Marp CLI séparément ou utiliser l'extension Marp de VS Code.
 

@@ -1,27 +1,59 @@
-# Publication du dépôt
+# Ouverture publique — checklist
 
-Le projet a été conçu pour devenir public : pas de configuration AKS, pas de noms de clients, pas de domaines internes, pas de secrets. Vérifier le diff final, les captures d'écran ajoutées et l'historique de commits avant de changer la visibilité.
+Le lab est conçu pour être public : pas d’AKS client, pas de secrets, kubeconfig isolé sous `.tools/`.  
+**Ne pas automatiser** le passage public (Settings GitHub uniquement).
 
-## Dépôt créé (privé)
+Dépôt : [EtienneDeneuve/flagger-demo-kind](https://github.com/EtienneDeneuve/flagger-demo-kind)
 
-Le dépôt de travail est [EtienneDeneuve/flagger-demo-kind](https://github.com/EtienneDeneuve/flagger-demo-kind), créé privé le 12 octobre 2026.
+## Avant de changer la visibilité
 
-Pour le cloner :
+### Contenu & hygiène
+
+- [ ] Historique Git sans tokens / kubeconfigs / emails clients (`git log -p` spot-check).
+- [ ] Aucun nom d’abonnement, tenant, domaine interne hors exemples pédagogiques.
+- [ ] `LICENSE` (MIT) et copyright à jour.
+- [ ] README FR + [README.en.md](../README.en.md) cohérents ; liens docs FR/EN OK.
+- [ ] Avertissement « lab pédagogique, pas un template prod » visible en tête.
+- [ ] `slides/social/` et exports marketing **hors** Git (voir `.gitignore`).
+- [ ] Essai à blanc Mac : `./setup.sh --yes`, scénarios TP 1–3 ou `scripts/ci-smoke.sh`.
+- [ ] CI verte sur `main` (validate + e2e).
+
+### Métadonnées GitHub (à poser au moment du public)
 
 ```bash
-gh repo clone EtienneDeneuve/flagger-demo-kind
-cd flagger-demo-kind
+gh repo edit EtienneDeneuve/flagger-demo-kind \
+  --visibility public \
+  --description "Hands-on Flagger lab on Kind: Gateway API, Cilium, Envoy Gateway — progressive delivery workshop (FR/EN)" \
+  --homepage "https://etienne.deneuve.xyz/projects/flagger-demo-kind/" \
+  --add-topic flagger \
+  --add-topic gateway-api \
+  --add-topic progressive-delivery \
+  --add-topic kubernetes \
+  --add-topic cilium \
+  --add-topic envoy-gateway \
+  --add-topic kind \
+  --add-topic workshop
 ```
 
-## Passer public ultérieurement (action volontaire)
+(`--visibility public` demande confirmation interactive — ou Settings → Danger Zone.)
 
-Sur GitHub : **Settings > General > Danger Zone > Change repository visibility > Public**, après avoir revu les fichiers et l'historique. Ne pas automatiser ce changement de visibilité dans un script ou une GitHub Action.
+### Site perso (projet OSS)
 
-## À contrôler avant publication
+Repo site : `etiennedeneuve.github.io`
 
-- [ ] Secrets et tokens absents de l'historique Git.
-- [ ] Aucun cluster, abonnement, tenant, email ou domaine de client.
-- [ ] Tous les scripts fonctionnent sur un Mac de test avec les versions épinglées.
-- [ ] Slides relues et rendues (`make slides`).
-- [ ] Sources officielles et licences correctement créditées.
-- [ ] Le README conserve l'avertissement « lab pédagogique ».
+- [ ] Page `src/content/projects/flagger-demo-kind.md` : passer `draft: false`.
+- [ ] Entrée `githubProjectsEditorial` (catégorie `kubernetes-platform`) active.
+- [ ] Article Thinking FR/EN (si rédigé) : `draft: false` le jour J, `relatedProjects: [flagger-demo-kind]`.
+- [ ] Vérifier `/projects/flagger-demo-kind/` et `/en/projects/flagger-demo-kind/`.
+
+### Ordre recommandé le jour J
+
+1. CI `main` verte sur le lab.
+2. `gh repo edit … --visibility public` (+ topics / homepage).
+3. Merger / publier la page projet (+ article) sur le site.
+4. Smoke : clone anonyme → `./setup.sh --tools-only` au minimum ; lien README ↔ page projet.
+
+## Après publication
+
+- Surveiller Issues ; renvoyer les participants vers `docs/en/05-tp-participant.md` ou FR selon la langue.
+- Ne pas promettre support prod ; préciser le périmètre (pas GitOps, pas TLS, métrique app Podinfo).
