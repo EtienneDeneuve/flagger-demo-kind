@@ -19,8 +19,9 @@ Compte rendu du 13 octobre 2026 sur le Mac formateur (Apple Silicon).
 ## Correctifs appliqués pendant la vérif
 
 1. **Découverte Rancher / OrbStack** — `ensure_docker_cli` dans `scripts/_common.sh` ajoute `~/.rd/bin` (et chemins Docker Desktop / OrbStack) si `docker` n’est pas dans le PATH. Utilisé par `setup.sh`, `bootstrap.sh`, `doctor.sh`.
-2. **`doctor`** — affiche le chemin réel de chaque binaire et signale si `kubectl`/`helm`/`kind`/`cilium` ne viennent pas de `.tools/bin` (piège Rancher qui ship aussi `kubectl`/`helm` dans `~/.rd/bin`).
-3. **Prompt Rancher** — si le moteur est arrêté et `rdctl` est présent, `setup.sh` propose `rdctl start --container-engine.name=moby`.
+2. **PATH `.tools/bin` prioritaire** — après avoir prépendé `~/.rd/bin` pour `docker`, `ensure_docker_cli` remet **toujours** `$TOOLS_BIN` en tête (`PATH="$TOOLS_BIN:$dir:$PATH"`). Sinon le `kubectl`/`helm` livré par Rancher masque les versions épinglées du lab (même bug en mode local **sans Nix**).
+3. **`doctor`** — affiche le chemin réel de chaque binaire et signale si `kubectl`/`helm`/`kind`/`cilium` ne viennent pas de `.tools/bin`.
+4. **Prompt Rancher** — si le moteur est arrêté et `rdctl` est présent, `setup.sh` propose `rdctl start --container-engine.name=moby`.
 
 ## Checklist à jouer dans un terminal local (hors agent)
 
@@ -58,6 +59,6 @@ Ou d’un coup : `bash scripts/verify-devenv-demo.sh` (écrit `.tools/verify-dev
 ## Points d’attention formateur
 
 - Avec Rancher en **manual PATH**, sans le correctif `ensure_docker_cli`, un shell « nu » ne voit pas `docker` → faux négatif « Docker CLI not found ».
-- Ne pas laisser `doctor` passer sur le `kubectl` Rancher : les versions lab sont celles de `versions.env` / `.tools/bin`.
+- Si `make doctor` montre `kubectl`/`helm` sous `~/.rd/bin` : le PATH lab est cassé — relancer via `./scripts/shell.sh` ou `make doctor` (qui source `_common.sh`) après mise à jour du dépôt.
 - Kubernetes Rancher intégré : **désactivé recommandé** pour ce TP (Kind porte le cluster). Engine = Moby uniquement.
-- Prévoir l’essai à blanc ci-dessus **avant** la séance ; la CI YAML/Bash ne remplace pas ce passage.
+- Essai à blanc **sans Nix** (majorité des participants) : `bash scripts/verify-local-demo.sh`. L’E2E Linux CI ne remplace pas un passage Mac local.

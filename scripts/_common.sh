@@ -18,8 +18,12 @@ export HELM_DATA_HOME="$TOOLS_DIR/helm/data"
 
 # Docker Desktop / OrbStack / Rancher Desktop (Moby) often ship a private CLI path.
 # Rancher with pathManagementStrategy=manual keeps ~/.rd/bin off the default PATH.
+# Important: ~/.rd/bin also ships kubectl/helm — never let them shadow .tools/bin pins.
 ensure_docker_cli() {
-  if command -v docker >/dev/null 2>&1; then return 0; fi
+  if command -v docker >/dev/null 2>&1; then
+    export PATH="$TOOLS_BIN:$PATH"
+    return 0
+  fi
   local candidates=(
     "$HOME/.rd/bin"
     "/Applications/Docker.app/Contents/Resources/bin"
@@ -28,7 +32,7 @@ ensure_docker_cli() {
   local dir
   for dir in "${candidates[@]}"; do
     if [[ -x "$dir/docker" ]]; then
-      export PATH="$dir:$PATH"
+      export PATH="$TOOLS_BIN:$dir:$PATH"
       return 0
     fi
   done

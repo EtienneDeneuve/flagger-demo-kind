@@ -19,8 +19,9 @@ Faire un essai à blanc et relever :
 - `make metrics` : après démarrage de la canary et d'un flux HTTP, le compteur 5xx est disponible
 - Promotion complète en ~30–60s (intervalle 10s, steps 25→50), rollback en ~20s, A/B par header
 
-Essai à blanc **sans Nix** (chemin participants) : `bash scripts/verify-local-demo.sh`.  
-Si le Mac formateur utilise **Rancher Desktop (Moby)** + **devenv**, voir aussi [docs/04-verification-devenv.md](04-verification-devenv.md).
+Essai à blanc **sans Nix** (chemin participants, défaut) : `bash scripts/verify-local-demo.sh`.  
+Nix/devenv est **optionnel** : même contrat `.tools/bin` + KUBECONFIG privé.  
+Si le Mac formateur utilise **Rancher Desktop (Moby)** (avec ou sans devenv), voir [docs/04-verification-devenv.md](04-verification-devenv.md) — vérifier que `make doctor` ne résout pas `kubectl`/`helm` depuis `~/.rd/bin`.
 
 ## Support participant
 

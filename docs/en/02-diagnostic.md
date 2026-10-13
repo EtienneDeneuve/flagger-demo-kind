@@ -14,6 +14,10 @@ make doctor   # kind/kubectl/helm/cilium must live under .tools/bin
 
 If `make browser` fails on `python3`, use `curl -H 'Host: podinfo.local' http://127.0.0.1:8080/`. Full path: `bash scripts/verify-local-demo.sh`.
 
+## Rancher Desktop: `kubectl` / `helm` not under `.tools/bin`
+
+`~/.rd/bin` also ships `kubectl` and `helm`. The lab must resolve CLIs from `.tools/bin` (pinned in `versions.env`). If `make doctor` shows `~/.rd/bin/...`, update the repo and re-run `make doctor` / `./scripts/shell.sh` — `_common.sh` keeps `.tools/bin` first after discovering `docker`.
+
 ## Mac cannot reach the Gateway LoadBalancer IP
 
 Expected with Docker Desktop: Kind’s network lives in a Linux VM. Use `make port`, then `curl -H 'Host: podinfo.local' http://127.0.0.1:8080/`. Do not edit `/etc/hosts` or macOS routing unless you choose to.
