@@ -10,3 +10,6 @@ slides/*.pdf
 slides/*.html
 slides/*.png
 slides/*.pptx
+# Marketing / LinkedIn exports — keep local, not in the public lab
+slides/social/
+scripts/export-social-png.py

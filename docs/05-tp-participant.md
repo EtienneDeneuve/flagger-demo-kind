@@ -1,5 +1,7 @@
 # TP participant — progressive delivery avec Flagger
 
+**Français** · **[English](en/05-tp-participant.md)**
+
 Tu manipules le cluster **avec des fichiers de conf**, pas seulement des raccourcis `make`.
 Les `make good|fail|ab` existent encore (même YAML en coulisse) — en séance, **ouvre et applique** les fichiers sous `manifests/tp/`.
 

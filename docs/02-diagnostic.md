@@ -1,5 +1,7 @@
 # Diagnostic rapide
 
+**Français** · **[English](en/02-diagnostic.md)**
+
 ## Le Mac n'accede pas a l'IP LoadBalancer de la Gateway
 
 Comportement attendu avec Docker Desktop : le reseau Kind vit dans une VM Linux. Utiliser `make port`, puis `curl -H 'Host: podinfo.local' http://127.0.0.1:8080/`. Ne pas modifier `/etc/hosts` ni le routage macOS.
