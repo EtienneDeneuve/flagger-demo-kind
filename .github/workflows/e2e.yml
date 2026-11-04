@@ -60,7 +60,7 @@ jobs:
         run: bash scripts/ci-smoke.sh
       - name: Upload diagnostics on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: flagger-lab-e2e-diagnostics
           path: .tools/e2e-logs/
