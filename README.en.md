@@ -1,15 +1,26 @@
-# Flagger Demo Kind — progressive delivery with Cilium and Envoy Gateway
+# Flagger + Gateway API — progressive delivery lab on Kind
 
-**[Français](README.md)** · English
+**[Français](README.md) · [English](README.en.md)**
 
-**60-minute macOS workshop · guided Marp slides · hands-on YAML (not just `make`).**
+**A reproducible 60-minute Kubernetes lab for canary delivery, rollback and A/B testing with Flagger, Gateway API, Envoy Gateway, Cilium and Prometheus.**
 
-Kubernetes can roll pods. Flagger decides whether a new revision **deserves more traffic**, using Prometheus metrics and Gateway API `HTTPRoute` weights. Traffic is served by Envoy Gateway; Cilium is the only CNI. **No Istio, no extra service mesh.**
+Kubernetes can deploy a new revision. This lab focuses on the next question: **who decides that the revision deserves more traffic, which metrics support that decision, and how the routing change is actually enforced**.
 
-This is a **teaching lab**, not a production template.
+<p align="center">
+  <a href="https://etienne.deneuve.xyz/en/projects/flagger-demo-kind/?utm_source=github&utm_medium=repository&utm_campaign=flagger-demo-kind&utm_content=readme-en">Project page</a> ·
+  <a href="docs/en/05-tp-participant.md">Participant lab</a> ·
+  <a href="docs/en/01-architecture.md">Architecture</a> ·
+  <a href="slides/flagger-tp.marp.md">Slides</a>
+</p>
 
-Project page: [etienne.deneuve.xyz/projects/flagger-demo-kind](https://etienne.deneuve.xyz/projects/flagger-demo-kind/).  
-**Repository goes public:** 13 October 2026, **10:30** (Europe/Paris).
+## What the lab demonstrates
+
+- **Progressive canary delivery** driven by Flagger and Prometheus metrics.
+- **Gateway API HTTPRoute** as the traffic-control surface.
+- **Envoy Gateway** as the data plane and **Cilium** as the CNI — no Istio or additional service mesh.
+- Observable, reproducible **promotion, rollback and A/B testing** on an isolated Kind cluster.
+
+> Teaching lab, not a production template. Versions are pinned and tooling stays isolated inside the repository.
 
 ## Quick start
 

@@ -1,13 +1,26 @@
-# Flagger Demo Kind — progressive delivery avec Cilium et Envoy Gateway
+# Flagger + Gateway API — lab de progressive delivery sur Kind
 
-**Français** · **[English](README.en.md)**
+**[Français](README.md) · [English](README.en.md)**
 
-**TP macOS de 60 minutes · slides Marp (parcours guidé) · YAML à appliquer (pas seulement `make`).**
+**Lab Kubernetes reproductible de 60 minutes pour comprendre le canary, le rollback et l'A/B testing avec Flagger, Gateway API, Envoy Gateway, Cilium et Prometheus.**
 
-Page projet (site) : [etienne.deneuve.xyz/projects/flagger-demo-kind](https://etienne.deneuve.xyz/projects/flagger-demo-kind/).  
-**Ouverture publique du dépôt :** 13 octobre 2026, **10h30** (Europe/Paris).
+Kubernetes sait déployer une nouvelle version. Ce lab montre la couche suivante : **qui décide qu'elle mérite davantage de trafic, sur quelles métriques, et comment ce choix est réellement appliqué au routage**.
 
-Kubernetes sait effectuer un rolling update. Flagger décide si une nouvelle version **mérite de recevoir davantage de trafic**, en analysant des métriques Prometheus et en modifiant les poids d'un HTTPRoute Gateway API. Le trafic est servi par Envoy Gateway ; Cilium est l'unique CNI. **Aucun Istio, aucun service mesh supplémentaire.**
+<p align="center">
+  <a href="https://etienne.deneuve.xyz/projects/flagger-demo-kind/?utm_source=github&utm_medium=repository&utm_campaign=flagger-demo-kind&utm_content=readme-fr">Page projet</a> ·
+  <a href="docs/05-tp-participant.md">TP participant</a> ·
+  <a href="docs/01-architecture.md">Architecture</a> ·
+  <a href="slides/flagger-tp.marp.md">Slides</a>
+</p>
+
+## Ce que le lab démontre
+
+- **Canary progressif** piloté par Flagger à partir de métriques Prometheus.
+- **Gateway API HTTPRoute** comme point de contrôle du trafic.
+- **Envoy Gateway** pour le data plane, **Cilium** comme CNI — sans Istio ni service mesh supplémentaire.
+- **Promotion, rollback et A/B testing** observables et reproductibles sur un cluster Kind isolé.
+
+> Support pédagogique, pas template de production. Les versions sont épinglées et les outils restent isolés dans le dépôt.
 
 ## Démarrage : cloner, un script, terminé
 
